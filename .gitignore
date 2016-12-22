@@ -39,3 +39,4 @@ captures/
 # Keystore files
 *.jks
 TravelJournal/TJ/.idea/
+TravelJournal/TJ/app/src/main/res/values/api-keys.xml
