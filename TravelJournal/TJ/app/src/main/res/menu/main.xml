@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:id="@+id/group1_main"
+           android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_about"
+            android:orderInCategory="100"
+            android:title="@string/action_about"
+            app:showAsAction="never"
+            android:checkable="false"/>
+    </group>
+
+    <group  android:id="@+id/group2_main"
+            android:checkableBehavior="single">
+    <item
+        android:id="@+id/action_buy"
+        android:orderInCategory="100"
+        android:title="@string/action_buy"
+        app:showAsAction="never"
+        android:checkable="false"/>
+    </group>
+
+    <group  android:id="@+id/group3_main"
+            android:checkableBehavior="single">
+    <item
+        android:id="@+id/action_exit"
+        android:orderInCategory="100"
+        android:title="@string/action_exit"
+        app:showAsAction="never"
+        android:checkable="false"/>
+    </group>
+</menu>

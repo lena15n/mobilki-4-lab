@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group  android:id="@+id/group1"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/bio"
+            android:title="@string/action_bio"/>
+    </group>
+
+    <group  android:id="@+id/group2"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/tags"
+            android:title="@string/action_tags"/>
+    </group>
+
+    <group  android:id="@+id/group3"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/settings"
+            android:title="@string/action_settings"/>
+    </group>
+
+    <group  android:id="@+id/group4"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/translate"
+            android:title="@string/action_translate"/>
+    </group>
+
+    <group  android:id="@+id/group5"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/divider"
+            android:title="@string/divider"/>
+    </group>
+</menu>
