@@ -42,7 +42,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             drawer.addDrawerListener(toggle);
             toggle.syncState();
 
-            drawer.setScrimColor(Color.argb(30, 0, 0, 0));
+            drawer.setScrimColor(Color.argb(200, 0, 0, 0));
 
             //drawer.setDrawerShadow(R.drawable.ic_toolbar_question, GravityCompat.START);
         }
