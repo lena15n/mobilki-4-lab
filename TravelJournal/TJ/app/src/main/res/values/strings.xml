@@ -29,6 +29,7 @@
     <string name="sight_mode_travel">Travel</string>
     <string name="sight_mode_sights_list">Sights list</string>
     <string name="sight_point">Sight point</string>
+    <string name="sight_set_description">Add description for the sight:</string>
 
     <string name="button_delete">Delete</string>
     <string name="button_create">Create</string>
@@ -43,6 +44,9 @@
     <string name="sights_header">Sights</string>
 
     <string name="select_icon">Select icon for sight:</string>
+
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_ok">OK</string>
 
     <string-array name="icon_names">
         <item>ic_person_pin_circle_blue_24px</item>

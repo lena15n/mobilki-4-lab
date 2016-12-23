@@ -1,7 +1,9 @@
 package com.lena.tj;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -17,8 +19,10 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatDrawableManager;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,6 +38,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final int REQUEST_NEW_ICON = 1;
     private SupportMapFragment mapFragment;
     private GoogleMap map;
+
+    private String sightName;
+    private LatLng target;
+    private int iconId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,26 +182,55 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
+        if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
             String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
-            int iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
-            LatLng target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            String sightName = data.getExtras().getString(getString(R.string.sight_description));
-            map.moveCamera(CameraUpdateFactory.newLatLng(target));
-            map.addMarker(new MarkerOptions()
-                    .title(sightName)
-                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(this, iconId)))
-                    .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
-                    .position(target));
-            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(LatLng latLng) {
-                    //nothing, unregister
-                }
-            });
-
-
+            iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
+            target = data.getExtras().getParcelable(getString(R.string.sight_point));
+            sightName = data.getExtras().getString(getString(R.string.sight_description));
+            showSetDescriptionDialog();
         }
+    }
+
+    private void showSetDescriptionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.sight_set_description));
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                sightName = input.getText().toString();
+
+                map.moveCamera(CameraUpdateFactory.newLatLng(target));
+                map.addMarker(new MarkerOptions()
+                        .title(sightName)
+                        .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, iconId)))
+                        .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                        .position(target));
+                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        //nothing, unregister
+                    }
+                });
+            }
+        });
+        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        //nothing, unregister
+                    }
+                });
+
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
