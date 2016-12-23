@@ -19,7 +19,6 @@ import android.support.v7.widget.AppCompatDrawableManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,8 +33,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String LOG_TAG = "~Mimi~";
     public static final int REQUEST_NEW_ICON = 1;
     private SupportMapFragment mapFragment;
-    private GoogleMap mMap;
-    private int mode;
+    private GoogleMap map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,14 +79,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        map = googleMap;
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
 
-        mMap.addMarker(new MarkerOptions().title("Marker in Sydney").position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_audiotrack)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));//.newLatLng(sydney));
-        mMap.addMarker(new MarkerOptions()
+        map.addMarker(new MarkerOptions().title("Marker in Sydney").position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_audiotrack)));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));//.newLatLng(sydney));
+        map.addMarker(new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_tv_dark))
                 .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
                 .position(new LatLng(41.889, -87.622)));
@@ -102,16 +100,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
 
         // Animate the change in camera view over 2 seconds
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),
                 5000, null);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(-18.142, 178.431), 2));
 
         /*      OR
         // Polylines are useful for marking paths and routes on the map.
 
-        mMap.addPolyline(new PolylineOptions().geodesic(true)
+        map.addPolyline(new PolylineOptions().geodesic(true)
                 .add(new LatLng(-33.866, 151.195))  // Sydney
                 .add(new LatLng(-18.142, 178.431))  // Fiji
                 .add(new LatLng(21.291, -157.821))  // Hawaii
@@ -154,9 +152,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (id == R.id.sights_list) {
 
         } else if (id == R.id.the_nearest_travel_to_me){
-            mode = R.id.the_nearest_travel_to_me;
-
-            mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
                     Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
@@ -177,17 +173,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if(requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
             String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
-            Toast.makeText(this, "You selected countrycode: " + countryCode, Toast.LENGTH_LONG).show();
             int iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
             LatLng target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
-            Bitmap bitmap = getBitmapFromVectorDrawable(this, iconId);
-            mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+            String sightName = data.getExtras().getString(getString(R.string.sight_description));
+            map.moveCamera(CameraUpdateFactory.newLatLng(target));
+            map.addMarker(new MarkerOptions()
+                    .title(sightName)
+                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(this, iconId)))
                     .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
                     .position(target));
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    //nothing, unregister
+                }
+            });
+
+
         }
     }
 
