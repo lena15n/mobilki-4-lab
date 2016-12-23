@@ -27,5 +27,4 @@
         <!-- without time line on top:   android:windowFullscreen="true"-->
     </android.support.design.widget.NavigationView>
 
-
 </android.support.v4.widget.DrawerLayout>

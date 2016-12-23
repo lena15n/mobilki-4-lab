@@ -1,5 +1,7 @@
 package com.lena.tj;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -10,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,8 +24,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
+    public static final String LOG_TAG = "~Mimi~";
     private SupportMapFragment mapFragment;
     private GoogleMap mMap;
+    private int mode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,15 +135,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.bio) {
+        if (id == R.id.create_travel) {
+            Intent intent = new Intent(this, SightActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.create_sight) {
 
-        } else if (id == R.id.tags) {
 
+        } else if (id == R.id.travels_list) {
 
-        } else if (id == R.id.settings) {
+        } else if (id == R.id.sights_list) {
 
-        } else if (id == R.id.translate) {
+        } else if (id == R.id.the_nearest_travel_to_me){
+            mode = R.id.the_nearest_travel_to_me;
 
+            mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+
+                    startActivityForResult(intent, 1);
+
+                }
+            });
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -147,5 +165,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1 && resultCode == Activity.RESULT_OK){
+            String countryCode = data.getStringExtra(IconChooserActivity.RESULT_CONTRYCODE);
+            Toast.makeText(this, "You selected countrycode: " + countryCode, Toast.LENGTH_LONG).show();
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(41.889, -87.622)));//.newLatLng(sydney));
+            mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_tv_dark))
+                    .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                    .position(new LatLng(41.889, -87.622)));
+        }
     }
 }

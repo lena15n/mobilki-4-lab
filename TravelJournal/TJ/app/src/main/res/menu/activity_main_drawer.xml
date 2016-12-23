@@ -4,32 +4,39 @@
     <group  android:id="@+id/group1"
             android:checkableBehavior="single">
         <item
-            android:id="@+id/bio"
-            android:title="@string/action_bio"/>
+            android:id="@+id/create_travel"
+            android:title="@string/action_create_travel"/>
     </group>
 
     <group  android:id="@+id/group2"
             android:checkableBehavior="single">
         <item
-            android:id="@+id/tags"
-            android:title="@string/action_tags"/>
+            android:id="@+id/create_sight"
+            android:title="@string/action_create_sight"/>
     </group>
 
     <group  android:id="@+id/group3"
             android:checkableBehavior="single">
         <item
-            android:id="@+id/settings"
-            android:title="@string/action_settings"/>
+            android:id="@+id/travels_list"
+            android:title="@string/action_travels_list"/>
     </group>
 
     <group  android:id="@+id/group4"
             android:checkableBehavior="single">
         <item
-            android:id="@+id/translate"
-            android:title="@string/action_translate"/>
+            android:id="@+id/sights_list"
+            android:title="@string/action_sights_list"/>
     </group>
 
     <group  android:id="@+id/group5"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/the_nearest_travel_to_me"
+            android:title="@string/action_the_nearest_travel_to_me"/>
+    </group>
+
+    <group  android:id="@+id/groupN"
             android:checkableBehavior="single">
         <item
             android:id="@+id/divider"

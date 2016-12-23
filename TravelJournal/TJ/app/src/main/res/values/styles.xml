@@ -12,4 +12,8 @@
 
     <style name="gmAppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
+    <style name="FontHeader" parent="@android:style/TextAppearance.Small">
+        <item name="android:textSize">20sp</item>
+    </style>
+
 </resources>

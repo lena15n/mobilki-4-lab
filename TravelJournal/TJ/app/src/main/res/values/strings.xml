@@ -12,8 +12,59 @@
     <string name="action_translate">Translate</string>
     <string name="divider">\t</string>
 
-    <string name="action_about">About</string>
-    <string name="action_buy">Buy</string>
-    <string name="action_exit">Exit</string>
+    <string name="action_create_travel">Create travel</string>
+    <string name="action_create_sight">Create sight</string>
+    <string name="action_travels_list">Show travels list</string>
+    <string name="action_sights_list">Show sights list</string>
+    <string name="action_the_nearest_travel_to_me">Show the nearest travel to me</string>
+
+    <string name="sight">Sight</string>
+    <string name="sight_description">Description:</string>
+    <string name="sight_latitude">Latitude:</string>
+    <string name="sight_longitude">Longitude:</string>
+    <string name="sight_travel">Travel name:</string>
+    <string name="sight_order">Order:</string>
+    <string name="sight_icon">Icon:</string>
+    <string name="sight_mode">Sight mode</string>
+    <string name="sight_mode_travel">Travel</string>
+    <string name="sight_mode_sights_list">Sights list</string>
+
+    <string name="button_delete">Delete</string>
+    <string name="button_create">Create</string>
+    <string name="button_show_on_the_map">Show on the map</string>
+
+    <string name="travel">Travel</string>
+    <string name="travel_name">Name:</string>
+    <string name="travel_photo">Photo:</string>
+    <string name="travel_button_show_sights">Show sights</string>
+    <string name="travel_sights_ids">Travel sights ids</string>
+
+    <string name="sights_header">Sights</string>
+
+    <string name="select_icon">Select icon for sight:</string>
+
+    <string-array name="country_names">
+        <item>\u00A0\u00A0+1 United States"</item>
+        <item>+45 Denmark</item>
+        <item>+46 Sweden</item>
+        <item>+47 Norway</item>
+        <item>+48 Last</item>
+    </string-array>
+
+    <string-array name="country_codes">
+        <item>1</item>
+        <item>45</item>
+        <item>46</item>
+        <item>47</item>
+        <item>48</item>
+    </string-array>
+
+    <string-array name="country_flags">
+        <item>@drawable/ic_person_pin_circle_blue_24px</item>
+        <item>@drawable/ic_person_pin_circle_black_24px</item>
+        <item>@drawable/ic_place_blue_24px</item>
+        <item>@drawable/ic_place_black_24px</item>
+        <item>@drawable/ic_favorite_border_black_24px</item>
+    </string-array>
 
 </resources>
