@@ -59,10 +59,13 @@
         </activity>
         <activity android:name=".TravelActivity">
         </activity>
-        <activity android:name=".IconChooserActivity"
-            android:theme="@android:style/Theme.Holo.Light.Dialog"
+        <activity
+            android:name=".IconChooserActivity"
+            android:label="@string/select_icon"
             android:noHistory="true"
-            android:label="@string/select_icon">
+            android:theme="@android:style/Theme.Holo.Light.Dialog">
+        </activity>
+        <activity android:name=".SearchActivity">
         </activity>
     </application>
 

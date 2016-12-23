@@ -1,6 +1,5 @@
 package com.lena.tj;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -35,7 +34,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,7 +57,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static final String LOG_TAG = "~Mimi~";
     public static final int REQUEST_NEW_ICON = 1;
     public static final int REQUEST_PERMISSION = 2;
-    public static final int PLACE_PICKER_REQUEST = 1;
+    public static final int PLACE_PICKER_REQUEST = 3;
 
     private SupportMapFragment mapFragment;
     private GoogleMap map;
@@ -254,24 +258,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         } else if (id == R.id.add_sight) {
             displayPlacePicker();
-            /*map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(LatLng latLng) {
-                    Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
-                    intent.putExtra(getString(R.string.sight_point), latLng);
-                    startActivityForResult(intent, REQUEST_NEW_ICON);
-                }
-            });*/
         } else if (id == R.id.add_sight_current) {
-            /*map.addMarker(new MarkerOptions()
-                    .position(new LatLng(arg0.getLatitude(), arg0.getLongitude()))
-                    .title("It's Me!"));
-            map.moveCamera(CameraUpdateFactory.newLatLng(target));
-            map.addMarker(new MarkerOptions()
-                    .title(sightDesc)
-                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, iconId)))
-                    .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
-                    .position(target));*/
+            guessCurrentPlace();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -286,13 +274,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
-            /*iconCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
-            iconId = this.getResources().getIdentifier(iconCode, "drawable", this.getPackageName());
-            target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            sightDesc = data.getExtras().getString(getString(R.string.sight_description));
-            showSetDescriptionDialog();*/
-        } else if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
+        if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
             Place place = PlacePicker.getPlace(data, this);
             String toastMsg = String.format("Place: %s", place.getName());
             Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
@@ -315,6 +297,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         Toast.makeText(this, content, Toast.LENGTH_LONG).show();  //mTextView.setText( content );
+    }
+
+    private void guessCurrentPlace() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
+            return;
+        }
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+        result.setResultCallback( new ResultCallback<PlaceLikelihoodBuffer>() {
+            @Override
+            public void onResult( PlaceLikelihoodBuffer likelyPlaces ) {
+                PlaceLikelihood placeLikelihood = likelyPlaces.get( 0 );
+                String content = "";
+                if( placeLikelihood != null && placeLikelihood.getPlace() != null && !TextUtils.isEmpty( placeLikelihood.getPlace().getName() ) )
+                    content = "Most likely place: " + placeLikelihood.getPlace().getName() + "\n";
+                if( placeLikelihood != null )
+                    content += "Percent change of being there: " + (int) ( placeLikelihood.getLikelihood() * 100 ) + "%";
+                Log.d(LOG_TAG, "guessCurrentPlace content: " + content);
+
+                //to avoid memory leaks
+                likelyPlaces.release();
+            }
+        });
     }
 
     private void showSetDescriptionDialog() {
@@ -361,6 +367,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.show();
     }
 
+
+    private void findPlaceById( String id ) {
+        if( TextUtils.isEmpty( id ) || mGoogleApiClient == null || !mGoogleApiClient.isConnected() )
+            return;
+
+        Places.GeoDataApi.getPlaceById( mGoogleApiClient, id ) .setResultCallback( new ResultCallback<PlaceBuffer>() {
+            @Override
+            public void onResult(PlaceBuffer places) {
+                if( places.getStatus().isSuccess() ) {
+                    Place place = places.get( 0 );
+                    displayPlace( place );
+                   // mPredictTextView.setText( "" );
+                    //mAdapter.clear();
+                }
+
+                //Release the PlaceBuffer to prevent a memory leak
+                places.release();
+            }
+        } );
+    }
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = AppCompatDrawableManager.get().getDrawable(context, drawableId);
