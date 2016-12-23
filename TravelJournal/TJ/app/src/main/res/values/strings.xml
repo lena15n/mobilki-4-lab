@@ -28,6 +28,7 @@
     <string name="sight_mode">Sight mode</string>
     <string name="sight_mode_travel">Travel</string>
     <string name="sight_mode_sights_list">Sights list</string>
+    <string name="sight_point">Sight point</string>
 
     <string name="button_delete">Delete</string>
     <string name="button_create">Create</string>
@@ -43,23 +44,15 @@
 
     <string name="select_icon">Select icon for sight:</string>
 
-    <string-array name="country_names">
-        <item>\u00A0\u00A0+1 United States"</item>
-        <item>+45 Denmark</item>
-        <item>+46 Sweden</item>
-        <item>+47 Norway</item>
-        <item>+48 Last</item>
+    <string-array name="icon_names">
+        <item>ic_person_pin_circle_blue_24px</item>
+        <item>ic_person_pin_circle_black_24px</item>
+        <item>ic_place_blue_24px</item>
+        <item>ic_place_black_24px</item>
+        <item>ic_favorite_border_black_24px</item>
     </string-array>
 
-    <string-array name="country_codes">
-        <item>1</item>
-        <item>45</item>
-        <item>46</item>
-        <item>47</item>
-        <item>48</item>
-    </string-array>
-
-    <string-array name="country_flags">
+    <string-array name="icon_drawables">
         <item>@drawable/ic_person_pin_circle_blue_24px</item>
         <item>@drawable/ic_person_pin_circle_black_24px</item>
         <item>@drawable/ic_place_blue_24px</item>

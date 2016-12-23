@@ -1,14 +1,21 @@
 package com.lena.tj;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatDrawableManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,6 +32,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
     public static final String LOG_TAG = "~Mimi~";
+    public static final int REQUEST_NEW_ICON = 1;
     private SupportMapFragment mapFragment;
     private GoogleMap mMap;
     private int mode;
@@ -152,9 +160,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onMapClick(LatLng latLng) {
                     Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
-
-                    startActivityForResult(intent, 1);
-
+                    intent.putExtra(getString(R.string.sight_point), latLng);
+                    startActivityForResult(intent, REQUEST_NEW_ICON);
                 }
             });
         }
@@ -170,15 +177,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 1 && resultCode == Activity.RESULT_OK){
-            String countryCode = data.getStringExtra(IconChooserActivity.RESULT_CONTRYCODE);
+        if(requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
+            String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
             Toast.makeText(this, "You selected countrycode: " + countryCode, Toast.LENGTH_LONG).show();
-
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(41.889, -87.622)));//.newLatLng(sydney));
+            int iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
+            LatLng target = data.getExtras().getParcelable(getString(R.string.sight_point));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(target));
+            Bitmap bitmap = getBitmapFromVectorDrawable(this, iconId);
             mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_tv_dark))
+                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap))
                     .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
-                    .position(new LatLng(41.889, -87.622)));
+                    .position(target));
         }
+    }
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable = AppCompatDrawableManager.get().getDrawable(context, drawableId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }

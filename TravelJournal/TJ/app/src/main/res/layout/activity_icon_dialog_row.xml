@@ -3,24 +3,11 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:padding="4dp" >
-
-    <!-- Views with default image and text, for demonstration.
-    They will be changed in the adapter -->
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/flag"
         android:layout_centerHorizontal="true"
         android:scaleType="centerInside"
-        android:layout_margin="5dp"
-         />
-
-    <!--<TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Title"
-        android:id="@+id/name"
-        android:layout_gravity="center_vertical" />-->
-
+        android:layout_margin="5dp"/>
 </RelativeLayout>

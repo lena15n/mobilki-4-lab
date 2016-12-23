@@ -13,77 +13,67 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class IconChooserActivity extends ListActivity {
-    public static String RESULT_CONTRYCODE = "countrycode";
-    public String[] countrynames, countrycodes;
-    private TypedArray imgs;
-    private List<Country> countryList;
+    public static String RESULT_ICON_ID = "icon id";
+    public String[] iconsNames;
+    private TypedArray icons;
+    private List<Icon> iconList;
+    private LatLng latLng; // transfer to another method in MapsActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_icon_chooser);
-
+        latLng = getIntent().getExtras().getParcelable(getString(R.string.sight_point));
         populateCountryList();
-        ArrayAdapter<Country> adapter = new IconListArrayAdapter(this, countryList);
+        ArrayAdapter<Icon> adapter = new IconListArrayAdapter(this, iconList);
         setListAdapter(adapter);
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Country c = countryList.get(position);
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra(RESULT_CONTRYCODE, c.getCode());
+                returnIntent.putExtra(RESULT_ICON_ID, iconsNames[position]);
+                returnIntent.putExtra(getString(R.string.sight_point), latLng);
                 setResult(RESULT_OK, returnIntent);
-                imgs.recycle(); //recycle images
+                icons.recycle(); //recycle images
                 finish();
             }
         });
     }
 
     private void populateCountryList() {
-        countryList = new ArrayList<>();
-        countrynames = getResources().getStringArray(R.array.country_names);
-        countrycodes = getResources().getStringArray(R.array.country_codes);
-        imgs = getResources().obtainTypedArray(R.array.country_flags);
-        for(int i = 0; i < countrycodes.length; i++){
-            countryList.add(new Country(countrynames[i], countrycodes[i], imgs.getDrawable(i)));
+        iconList = new ArrayList<>();
+        iconsNames = getResources().getStringArray(R.array.icon_names);
+        icons = getResources().obtainTypedArray(R.array.icon_drawables);
+        for(int i = 0; i < iconsNames.length; i++){
+            iconList.add(new Icon(icons.getDrawable(i)));
         }
     }
 
-    public class Country {
-        private String name;
-        private String code;
+    public class Icon {
         private Drawable flag;
-        public Country(String name, String code, Drawable flag){
-            this.name = name;
-            this.code = code;
+        public Icon(Drawable flag){
             this.flag = flag;
-        }
-        public String getName() {
-            return name;
         }
         public Drawable getFlag() {
             return flag;
         }
-        public String getCode() {
-            return code;
-        }
     }
 
-    public class IconListArrayAdapter extends ArrayAdapter<IconChooserActivity.Country> {
+    public class IconListArrayAdapter extends ArrayAdapter<Icon> {
 
-        private final List<IconChooserActivity.Country> list;
+        private final List<Icon> list;
         private final Activity context;
 
         class ViewHolder {
-            //protected TextView name;
             protected ImageView flag;
         }
 
-        public IconListArrayAdapter(Activity context, List<IconChooserActivity.Country> list) {
+        public IconListArrayAdapter(Activity context, List<Icon> list) {
             super(context, R.layout.activity_icon_dialog_row, list);
             this.context = context;
             this.list = list;
@@ -97,7 +87,6 @@ public class IconChooserActivity extends ListActivity {
                 LayoutInflater inflator = context.getLayoutInflater();
                 view = inflator.inflate(R.layout.activity_icon_dialog_row, null);
                 final ViewHolder viewHolder = new ViewHolder();
-                //viewHolder.name = (TextView) view.findViewById(R.id.name);
                 viewHolder.flag = (ImageView) view.findViewById(R.id.flag);
                 view.setTag(viewHolder);
             } else {
@@ -105,7 +94,6 @@ public class IconChooserActivity extends ListActivity {
             }
 
             ViewHolder holder = (ViewHolder) view.getTag();
-           // holder.name.setText(list.get(position).getName());
             holder.flag.setImageDrawable(list.get(position).getFlag());
             return view;
         }
