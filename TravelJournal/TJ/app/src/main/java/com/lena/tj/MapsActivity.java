@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.lena.tj.db.DbOperations;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
     public static final String LOG_TAG = "~Mimi~";
@@ -39,7 +40,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SupportMapFragment mapFragment;
     private GoogleMap map;
 
-    private String sightName;
+    private String sightDesc;
     private LatLng target;
     private int iconId;
 
@@ -186,7 +187,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
             iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            sightName = data.getExtras().getString(getString(R.string.sight_description));
+            sightDesc = data.getExtras().getString(getString(R.string.sight_description));
             showSetDescriptionDialog();
         }
     }
@@ -200,11 +201,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                sightName = input.getText().toString();
+                sightDesc = input.getText().toString();
 
                 map.moveCamera(CameraUpdateFactory.newLatLng(target));
                 map.addMarker(new MarkerOptions()
-                        .title(sightName)
+                        .title(sightDesc)
                         .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, iconId)))
                         .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
                         .position(target));
@@ -214,6 +215,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         //nothing, unregister
                     }
                 });
+
+                DbOperations.insertNewSight(MapsActivity.this, sightDesc, iconId, target.latitude, target.longitude);
             }
         });
         builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {

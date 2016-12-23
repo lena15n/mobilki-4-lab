@@ -9,7 +9,7 @@ public final class TravelJournalContract {
     private static final String TEXT_TYPE = " TEXT ";
     private static final String INTEGER_TYPE = " INTEGER ";
     private static final String REAL_TYPE = " REAL ";
-    private static final String COMMA_SEP = ",";
+    private static final String COMMA_SEP = ", ";
 
     // To prevent someone from accidentally instantiating the contract class,
     // make the constructor private.
@@ -23,8 +23,7 @@ public final class TravelJournalContract {
         public static final String SQL_CREATE_TRAVEL = "CREATE TABLE " +
                 TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
-                NAME + TEXT_TYPE + COMMA_SEP +
-                LINE_COLOR + " )";
+                NAME + TEXT_TYPE + " )";
         public static final String SQL_DELETE_TRAVEL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
         private Travel (){}
@@ -36,19 +35,17 @@ public final class TravelJournalContract {
         public static final String ICON = "icon";
         public static final String LATITUDE = "latitude";
         public static final String LONGITUDE = "longitude";
-        public static final String ORDER = "order";
+        public static final String ORDER = "order_in_travel";
         public static final String TRAVEL_ID = "travel_id";
 
         public static final String TEMP_TABLE_NAME = "temp_column";
         public static final String TEMP_SIGHT_ID = "sight_id";
         public static final String TEMP_PHOTO_ID = "photo_id";
 
-
-        public static final String SQL_CREATE_SIGHT = "CREATE TABLE " +
-                TABLE_NAME + " (" +
+        public static final String SQL_CREATE_SIGHT = "CREATE TABLE " + TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY," +
                 DESCRIPTION + TEXT_TYPE + COMMA_SEP +
-                ICON + TEXT_TYPE + COMMA_SEP +
+                ICON + INTEGER_TYPE + COMMA_SEP +
                 LATITUDE + REAL_TYPE + COMMA_SEP +
                 LONGITUDE + REAL_TYPE + COMMA_SEP +
                 ORDER + INTEGER_TYPE + COMMA_SEP +
