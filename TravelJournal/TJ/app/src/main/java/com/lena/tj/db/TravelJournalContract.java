@@ -18,7 +18,6 @@ public final class TravelJournalContract {
     public static final class Travel implements BaseColumns {
         public static final String TABLE_NAME       = "travel";
         public static final String NAME = "name";
-        public static final String LINE_COLOR = "color";
 
         public static final String SQL_CREATE_TRAVEL = "CREATE TABLE " +
                 TABLE_NAME + " (" +
@@ -45,7 +44,7 @@ public final class TravelJournalContract {
         public static final String SQL_CREATE_SIGHT = "CREATE TABLE " + TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY," +
                 DESCRIPTION + TEXT_TYPE + COMMA_SEP +
-                ICON + INTEGER_TYPE + COMMA_SEP +
+                ICON + TEXT_TYPE + COMMA_SEP +
                 LATITUDE + REAL_TYPE + COMMA_SEP +
                 LONGITUDE + REAL_TYPE + COMMA_SEP +
                 ORDER + INTEGER_TYPE + COMMA_SEP +

@@ -36,6 +36,20 @@
             android:title="@string/action_the_nearest_travel_to_me"/>
     </group>
 
+    <group  android:id="@+id/group6"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/add_sight"
+            android:title="@string/action_add_sight"/>
+    </group>
+
+    <group  android:id="@+id/group7"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/add_sight_current"
+            android:title="@string/action_add_sight_current"/>
+    </group>
+
     <group  android:id="@+id/groupN"
             android:checkableBehavior="single">
         <item

@@ -7,14 +7,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class DbOperations {
-    public static void insertNewSight(Context context, String desc, int iconId, double latitude, double longitude){
+    public static void insertNewSight(Context context, String desc, String iconCode, double latitude, double longitude){
         TravelJournalDbHelper mDbHelper = new TravelJournalDbHelper(context);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         //insert into Record
         ContentValues values = new ContentValues();
         values.put(TravelJournalContract.Sight.DESCRIPTION, desc);
-        values.put(TravelJournalContract.Sight.ICON, iconId);
+        values.put(TravelJournalContract.Sight.ICON, iconCode);
         values.put(TravelJournalContract.Sight.LATITUDE, latitude);
         values.put(TravelJournalContract.Sight.LONGITUDE, longitude);
         long newRecordId = db.insert(TravelJournalContract.Sight.TABLE_NAME, null, values);
@@ -52,7 +52,7 @@ public class DbOperations {
                 do {
                     long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
                     String desc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
-                    int icon = cursor.getInt(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
+                    String icon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
                     double lat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
                     double lon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
 

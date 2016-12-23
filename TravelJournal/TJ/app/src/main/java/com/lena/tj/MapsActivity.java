@@ -5,13 +5,17 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,10 +24,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatDrawableManager;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,15 +48,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.lena.tj.db.DbOperations;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     public static final String LOG_TAG = "~Mimi~";
     public static final int REQUEST_NEW_ICON = 1;
+    public static final int REQUEST_PERMISSION = 2;
+    public static final int PLACE_PICKER_REQUEST = 1;
+
     private SupportMapFragment mapFragment;
     private GoogleMap map;
 
     private String sightDesc;
     private LatLng target;
     private int iconId;
+    private String iconCode;
+    private LatLng currentLocation;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,11 +93,47 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this); // -> OnMapReady
-
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .enableAutoManage(this, 0, this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
     }
 
-    private void init() {
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
     }
+
+    @Override
+    protected void onStop() {
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+        super.onStop();
+    }
+
+    private void displayPlacePicker() {
+        if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
+            return;
+
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+
+        try {
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesRepairableException e) {
+            Log.d("PlacesAPI Demo", "GooglePlayServicesRepairableException thrown");
+        } catch (GooglePlayServicesNotAvailableException e) {
+            Log.d("PlacesAPI Demo", "GooglePlayServicesNotAvailableException thrown");
+        }
+    }
+
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -89,6 +146,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION);
+            return;
+        }
+        map.setMyLocationEnabled(true);
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+        try {
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
@@ -99,8 +172,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_tv_dark))
                 .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
                 .position(new LatLng(41.889, -87.622)));
-                //.flat(true)
-                //.rotation(245));
+        //.flat(true)
+        //.rotation(245));
 
         CameraPosition cameraPosition = CameraPosition.builder()
                 .target(new LatLng(41.889, -87.622))
@@ -124,6 +197,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .add(new LatLng(21.291, -157.821))  // Hawaii
                 .add(new LatLng(37.423, -122.091))  // Mountain View
         ); */
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
     }
 
     @Override
@@ -160,15 +250,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         } else if (id == R.id.sights_list) {
 
-        } else if (id == R.id.the_nearest_travel_to_me){
-            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        } else if (id == R.id.the_nearest_travel_to_me) {
+
+        } else if (id == R.id.add_sight) {
+            displayPlacePicker();
+            /*map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(LatLng latLng) {
                     Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
                     intent.putExtra(getString(R.string.sight_point), latLng);
                     startActivityForResult(intent, REQUEST_NEW_ICON);
                 }
-            });
+            });*/
+        } else if (id == R.id.add_sight_current) {
+            /*map.addMarker(new MarkerOptions()
+                    .position(new LatLng(arg0.getLatitude(), arg0.getLongitude()))
+                    .title("It's Me!"));
+            map.moveCamera(CameraUpdateFactory.newLatLng(target));
+            map.addMarker(new MarkerOptions()
+                    .title(sightDesc)
+                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, iconId)))
+                    .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                    .position(target));*/
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -183,13 +286,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
-            String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
-            iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
+        if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
+            /*iconCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
+            iconId = this.getResources().getIdentifier(iconCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
             sightDesc = data.getExtras().getString(getString(R.string.sight_description));
-            showSetDescriptionDialog();
+            showSetDescriptionDialog();*/
+        } else if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
+            Place place = PlacePicker.getPlace(data, this);
+            String toastMsg = String.format("Place: %s", place.getName());
+            Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void displayPlace(Place place) {
+        if (place == null)
+            return;
+
+        String content = "";
+        if (!TextUtils.isEmpty(place.getName())) {
+            content += "Name: " + place.getName() + "\n";
+        }
+        if (!TextUtils.isEmpty(place.getAddress())) {
+            content += "Address: " + place.getAddress() + "\n";
+        }
+        if (!TextUtils.isEmpty(place.getPhoneNumber())) {
+            content += "Phone: " + place.getPhoneNumber();
+        }
+
+        Toast.makeText(this, content, Toast.LENGTH_LONG).show();  //mTextView.setText( content );
     }
 
     private void showSetDescriptionDialog() {
@@ -216,7 +341,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 });
 
-                DbOperations.insertNewSight(MapsActivity.this, sightDesc, iconId, target.latitude, target.longitude);
+                DbOperations.insertNewSight(MapsActivity.this, sightDesc, iconCode, target.latitude, target.longitude);
             }
         });
         builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
@@ -236,6 +361,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         builder.show();
     }
 
+
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable = AppCompatDrawableManager.get().getDrawable(context, drawableId);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
@@ -249,5 +375,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Toast.makeText(this, "onConnectionFailed " + connectionResult.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 }

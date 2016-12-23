@@ -17,6 +17,8 @@
     <string name="action_travels_list">Show travels list</string>
     <string name="action_sights_list">Show sights list</string>
     <string name="action_the_nearest_travel_to_me">Show the nearest travel to me</string>
+    <string name="action_add_sight">Create sight on the map</string>
+    <string name="action_add_sight_current">Add my current location as sight</string>
 
     <string name="sight">Sight</string>
     <string name="sight_description">Description:</string>
