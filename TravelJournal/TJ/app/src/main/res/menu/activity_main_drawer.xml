@@ -11,8 +11,8 @@
     <group  android:id="@+id/group2"
             android:checkableBehavior="single">
         <item
-            android:id="@+id/create_sight"
-            android:title="@string/action_create_sight"/>
+            android:id="@+id/create_sight_by_address"
+            android:title="@string/action_create_sight_by_address"/>
     </group>
 
     <group  android:id="@+id/group3"

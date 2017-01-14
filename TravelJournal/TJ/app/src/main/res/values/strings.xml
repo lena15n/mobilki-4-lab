@@ -13,7 +13,7 @@
     <string name="divider">\t</string>
 
     <string name="action_create_travel">Create travel</string>
-    <string name="action_create_sight">Create sight</string>
+    <string name="action_create_sight_by_address">Create sight by address</string>
     <string name="action_travels_list">Show travels list</string>
     <string name="action_sights_list">Show sights list</string>
     <string name="action_the_nearest_travel_to_me">Show the nearest travel to me</string>

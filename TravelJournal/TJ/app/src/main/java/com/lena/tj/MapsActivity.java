@@ -1,5 +1,6 @@
 package com.lena.tj;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -64,11 +65,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap map;
 
     private String sightDesc;
+    private String sightName;
     private LatLng target;
     private int iconId;
     private String iconCode;
     private LatLng currentLocation;
     private GoogleApiClient mGoogleApiClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,12 +126,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStop();
     }
 
-    private void displayPlacePicker() {
+    private void displayPlacePickerAndAddSight() {
         if (mGoogleApiClient == null || !mGoogleApiClient.isConnected())
             return;
 
         PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-
         try {
             startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
         } catch (GooglePlayServicesRepairableException e) {
@@ -158,15 +160,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         map.setMyLocationEnabled(true);
-        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-        try {
-            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
-        } catch (GooglePlayServicesRepairableException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        }
-
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
@@ -248,8 +241,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (id == R.id.create_travel) {
             Intent intent = new Intent(this, SightActivity.class);
             startActivity(intent);
-        } else if (id == R.id.create_sight) {
-
+        } else if (id == R.id.create_sight_by_address) {
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+                    intent.putExtra(getString(R.string.sight_point), latLng);
+                    startActivityForResult(intent, REQUEST_NEW_ICON);
+                }
+            });
 
         } else if (id == R.id.travels_list) {
 
@@ -258,7 +258,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (id == R.id.the_nearest_travel_to_me) {
 
         } else if (id == R.id.add_sight) {
-            displayPlacePicker();
+            displayPlacePickerAndAddSight();
         } else if (id == R.id.add_sight_current) {
             guessCurrentPlace();
         }
@@ -276,22 +276,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == PLACE_PICKER_REQUEST && resultCode == RESULT_OK) {
-            Place place = PlacePicker.getPlace(data, this);
+            Place place = PlacePicker.getPlace(this, data);
             String toastMsg = String.format("Place: %s", place.getName());
             Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
-            new PostTask(this).execute("https://maps.googleapis.com/maps/api/place/add/json?key=" + getString(R.string.GoogleMapsServiceKey), "{\n" +
-                    "  \"location\": {\n" +
-                    "    \"lat\": "+ place.getLatLng().latitude + ",\n" +
-                    "    \"lng\": "+ place.getLatLng().longitude +"\n" +
-                    "  },\n" +
-                    "  \"accuracy\": 50,\n" +
-                    "  \"name\": \"Google Shoes!\",\n" +
-                    "  \"phone_number\": \"(02) 9374 4000\",\n" +
-                    "  \"address\": \"48 Pirrama Road, Pyrmont, NSW 2009, Australia\",\n" +
-                    "  \"types\": [\"shoe_store\"],\n" +
-                    "  \"website\": \"http://www.google.com.au/\",\n" +
-                    "  \"language\": \"en-AU\"\n" +
-                    "}");
+
+            Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+            intent.putExtra(getString(R.string.sight_point), place.getLatLng());
+            startActivityForResult(intent, REQUEST_NEW_ICON);
+        }
+        else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
+            String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
+            iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
+            target = data.getExtras().getParcelable(getString(R.string.sight_point));
+            sightName = data.getExtras().getString(getString(R.string.sight_description));
+            showSetDescriptionDialog();
         }
     }
 
@@ -323,13 +321,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         result.setResultCallback( new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
             public void onResult( PlaceLikelihoodBuffer likelyPlaces ) {
-                PlaceLikelihood placeLikelihood = likelyPlaces.get( 0 );
+                PlaceLikelihood placeLikelihood = likelyPlaces.get(0);
                 String content = "";
                 if( placeLikelihood != null && placeLikelihood.getPlace() != null && !TextUtils.isEmpty( placeLikelihood.getPlace().getName() ) )
                     content = "Most likely place: " + placeLikelihood.getPlace().getName() + "\n";
                 if( placeLikelihood != null )
                     content += "Percent change of being there: " + (int) ( placeLikelihood.getLikelihood() * 100 ) + "%";
                 Log.d(LOG_TAG, "guessCurrentPlace content: " + content);
+
 
                 //to avoid memory leaks
                 likelyPlaces.release();
