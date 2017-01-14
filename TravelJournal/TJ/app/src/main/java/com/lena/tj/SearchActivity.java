@@ -98,8 +98,8 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
                 Intent data = new Intent();
                 if (placeResult != null) {
                     setResult(RESULT_OK, data);
+                    data.putExtra(getString(R.string.sight_point), placeResult.getLatLng());
                 }
-                data.putExtra(getString(R.string.sight_point), placeResult.getLatLng());
                 finish();
             }
         });
