@@ -34,6 +34,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
@@ -48,6 +49,7 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
     protected GoogleApiClient mGoogleApiClient;
     private PlaceAutocompleteAdapter mAdapter;
     private AutoCompleteTextView mAutocompleteView;
+    private AutocompleteFilter autocompleteFilter;
     private static final LatLngBounds EMPTY_BOUNDS = null; /*new LatLngBounds(
             new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));*/
 
@@ -72,10 +74,12 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
 
         // Register a listener that receives callbacks when a suggestion has been selected
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
-
+        autocompleteFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
+                .build();
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
         // the entire world.
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, EMPTY_BOUNDS, null);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, EMPTY_BOUNDS, autocompleteFilter);
         mAutocompleteView.setAdapter(mAdapter);
 
         // Set up the 'clear text' button that clears the text in the autocomplete view
@@ -132,9 +136,6 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-
-            Toast.makeText(getApplicationContext(), "Clicked: " + primaryText,
-                    Toast.LENGTH_SHORT).show();
             Log.i(MapsActivity.LOG_TAG, "Called getPlaceById to get Place details for " + placeId);
         }
     };
