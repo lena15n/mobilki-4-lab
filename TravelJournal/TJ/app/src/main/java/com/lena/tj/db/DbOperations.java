@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.lena.tj.MapsActivity;
 import com.lena.tj.dataobjects.DOSight;
+import com.lena.tj.dataobjects.DOTravel;
 
 import java.util.ArrayList;
 
@@ -88,10 +89,12 @@ public class DbOperations {
         String sortOrder =
                 TravelJournalContract.Sight._ID + " ASC";
 
+        String travelIdIsEmpty = TravelJournalContract.Sight.TRAVEL_ID + " IS NULL";
+
         Cursor cursor = db.query(
                 TravelJournalContract.Sight.TABLE_NAME,  // The table to query
                 projection,                               // The columns to return
-                null,                                     // The columns for the WHERE clause
+                travelIdIsEmpty,                          // The columns for the WHERE clause
                 null,                                     // The values for the WHERE clause
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
@@ -120,5 +123,53 @@ public class DbOperations {
         db.close();
 
         return sights;
+    }
+
+    public static ArrayList<DOTravel> getAllTravels(Context context){
+        ArrayList<DOTravel> travels = new ArrayList<>();
+
+        /*TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String[] projection = {
+                TravelJournalContract.Travel._ID,
+                TravelJournalContract.Travel.NAME
+        };
+
+        // How you want the results sorted in the resulting Cursor
+        String sortOrder =
+                TravelJournalContract.Sight._ID + " ASC";
+
+        Cursor cursor = db.query(
+                TravelJournalContract.Travel.TABLE_NAME,  // The table to query
+                projection,                               // The columns to return
+                null,                                     // The columns for the WHERE clause
+                null,                                     // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
+                    String desc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
+                    String icon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
+                    double lat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
+                    double lon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
+
+                    Log.d(MapsActivity.LOG_TAG, "Record: id = " + id + ", name: " + desc + ", icon: " + icon +
+                            "\nlat: " + lat + ", long: " + lon);
+
+                    //travels.add(new DOSight(id, desc, lat, lon, icon));
+                }
+                while (cursor.moveToNext());
+            }
+        }
+
+        cursor.close();
+        db.close(); */
+
+        return travels;
     }
 }

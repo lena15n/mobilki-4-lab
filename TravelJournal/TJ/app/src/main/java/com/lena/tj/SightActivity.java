@@ -56,6 +56,8 @@ public class SightActivity extends AppCompatActivity {
     }
 
     private void updateSightView(DOSight newSight) {
+        sight = newSight;
+
         TextView descTextView = (TextView) findViewById(R.id.sight_desc);
         descTextView.setText(newSight.getDescription());
 
@@ -66,7 +68,20 @@ public class SightActivity extends AppCompatActivity {
         longitudeTextView.setText(Double.toString(newSight.getLongitude()));
 
         TextView orderTextView = (TextView) findViewById(R.id.sight_order);
-        orderTextView.setText(Double.toString(newSight.getOrder()));
+        TextView travelNameTextView = (TextView) findViewById(R.id.sight_travel_name_textview);
+
+        if (mode.equals(getString(R.string.travel))) {
+            orderTextView.setText(Double.toString(newSight.getOrder()));
+           // travelNameTextView.setText(Double.toString(newSight.getTravelId()));
+        }
+        else {
+            TextView orderHeaderTextView = (TextView) findViewById(R.id.sight_order_textview);
+            TextView travelNameHeaderTextView = (TextView) findViewById(R.id.sight_travel_textview);
+            orderTextView.setVisibility(View.INVISIBLE);
+            orderHeaderTextView.setVisibility(View.INVISIBLE);
+            travelNameTextView.setVisibility(View.INVISIBLE);
+            travelNameHeaderTextView.setVisibility(View.INVISIBLE);
+        }
 
         addImageViews();
     }

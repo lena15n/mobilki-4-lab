@@ -52,6 +52,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.lena.tj.dataobjects.DOSight;
+import com.lena.tj.dataobjects.DOTravel;
 import com.lena.tj.db.DbOperations;
 import com.lena.tj.net.PostTask;
 
@@ -200,10 +201,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         ); */
 
 
-        openSightsAndTravels();
+        openSights();
+        openTravels();
     }
 
-    private void openSightsAndTravels() {
+    private void openSights() {
         ArrayList<DOSight> sights = DbOperations.getAllSeparateSights(this);
 
         for (DOSight sight : sights) {
@@ -214,6 +216,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
                     .setTitle(sight.getDescription());
         }
+    }
+
+    private void openTravels() {
+        ArrayList<DOTravel> travels = DbOperations.getAllTravels(this);
+        //TODO
     }
 
     @Override
@@ -260,17 +267,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (id == R.id.create_travel) {
             Intent intent = new Intent(this, SightActivity.class);
             startActivity(intent);
-        } else if (id == R.id.create_sight_by_address) {
+        }
+        else if (id == R.id.create_sight_by_address) {
             createSightByAddress();
-        } else if (id == R.id.add_sight) {
+        }
+        else if (id == R.id.add_sight) {
             displayPlacePickerAndAddSight();
-        } else if (id == R.id.add_sight_current) {
+        }
+        else if (id == R.id.add_sight_current) {
             guessCurrentPlace();
-        } else if (id == R.id.travels_list) {
+        }
+        else if (id == R.id.travels_list) {
 
-        } else if (id == R.id.sights_list) {
-
-        } else if (id == R.id.the_nearest_travel_to_me) {
+        }
+        else if (id == R.id.sights_list) {
+            startActivity(new Intent(this, SightsListActivity.class));
+        }
+        else if (id == R.id.the_nearest_travel_to_me) {
 
         }
 
@@ -294,12 +307,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
             intent.putExtra(getString(R.string.sight_point), place.getLatLng());
             startActivityForResult(intent, REQUEST_NEW_ICON);
-        } else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
+        }
+        else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
             iconCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
             iconId = this.getResources().getIdentifier(iconCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
             insertSightInfoIntoDB();
-        } else if (requestCode == REQUEST_NEW_SIGHT_BY_ADDRESS && resultCode == Activity.RESULT_OK) {
+        }
+        else if (requestCode == REQUEST_NEW_SIGHT_BY_ADDRESS && resultCode == Activity.RESULT_OK) {
             LatLng placeLatLng = data.getParcelableExtra(getString(R.string.sight_point));
 
             Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
