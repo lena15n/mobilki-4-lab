@@ -11,43 +11,43 @@
     <group  android:id="@+id/group2"
             android:checkableBehavior="single">
         <item
+            android:id="@+id/add_sight"
+            android:title="@string/action_add_sight"/>
+    </group>
+
+    <group  android:id="@+id/group3"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/add_sight_current"
+            android:title="@string/action_add_sight_current"/>
+    </group>
+
+    <group  android:id="@+id/group4"
+            android:checkableBehavior="single">
+        <item
             android:id="@+id/create_sight_by_address"
             android:title="@string/action_create_sight_by_address"/>
     </group>
 
-    <group  android:id="@+id/group3"
+    <group  android:id="@+id/group5"
             android:checkableBehavior="single">
         <item
             android:id="@+id/travels_list"
             android:title="@string/action_travels_list"/>
     </group>
 
-    <group  android:id="@+id/group4"
+    <group  android:id="@+id/group6"
             android:checkableBehavior="single">
         <item
             android:id="@+id/sights_list"
             android:title="@string/action_sights_list"/>
     </group>
 
-    <group  android:id="@+id/group5"
+    <group  android:id="@+id/group7"
             android:checkableBehavior="single">
         <item
             android:id="@+id/the_nearest_travel_to_me"
             android:title="@string/action_the_nearest_travel_to_me"/>
-    </group>
-
-    <group  android:id="@+id/group6"
-            android:checkableBehavior="single">
-        <item
-            android:id="@+id/add_sight"
-            android:title="@string/action_add_sight"/>
-    </group>
-
-    <group  android:id="@+id/group7"
-            android:checkableBehavior="single">
-        <item
-            android:id="@+id/add_sight_current"
-            android:title="@string/action_add_sight_current"/>
     </group>
 
     <group  android:id="@+id/groupN"

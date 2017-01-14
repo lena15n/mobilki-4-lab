@@ -11,4 +11,57 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.lena.tj.SearchActivity">
 
+    <TextView
+        android:layout_alignParentBottom="true"
+        android:text="@string/search_copyright"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView"/>
+
+    <AutoCompleteTextView
+        android:hint="@string/search_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:id="@+id/autoCompleteTextView"/>
+
+    <Button
+        android:text="@string/search_choose_button"
+        android:layout_alignParentStart="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="148dp"
+        android:id="@+id/search_button_choose"
+        android:layout_below="@+id/autoCompleteTextView"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:text="@string/search_clear_button"
+        android:layout_alignParentEnd="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="148dp"
+        android:id="@+id/button_clear"
+        android:layout_below="@+id/autoCompleteTextView"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/autoCompleteTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:id="@+id/place_details"/>
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/place_details"
+        android:layout_alignStart="@+id/place_details"
+        android:layout_marginTop="27dp"
+        android:id="@+id/place_attribution"/>
 </RelativeLayout>

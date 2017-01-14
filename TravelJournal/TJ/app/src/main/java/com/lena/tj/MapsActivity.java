@@ -57,15 +57,15 @@ import com.lena.tj.net.PostTask;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PostTask.MyAsyncResponse {
     public static final String LOG_TAG = "~Mimi~";
-    public static final int REQUEST_NEW_ICON = 1;
-    public static final int REQUEST_PERMISSION = 2;
-    public static final int PLACE_PICKER_REQUEST = 3;
+    private static final int REQUEST_NEW_ICON = 1;
+    private static final int REQUEST_PERMISSION = 2;
+    private static final int PLACE_PICKER_REQUEST = 3;
+    private static final int REQUEST_NEW_SIGHT_BY_ADDRESS = 4;
 
     private SupportMapFragment mapFragment;
     private GoogleMap map;
 
     private String sightDesc;
-    private String sightName;
     private LatLng target;
     private int iconId;
     private String iconCode;
@@ -242,17 +242,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(this, SightActivity.class);
             startActivity(intent);
         } else if (id == R.id.create_sight_by_address) {
-
+            createSightByAddress();
+        } else if (id == R.id.add_sight) {
+            displayPlacePickerAndAddSight();
+        } else if (id == R.id.add_sight_current) {
+            guessCurrentPlace();
         } else if (id == R.id.travels_list) {
 
         } else if (id == R.id.sights_list) {
 
         } else if (id == R.id.the_nearest_travel_to_me) {
 
-        } else if (id == R.id.add_sight) {
-            displayPlacePickerAndAddSight();
-        } else if (id == R.id.add_sight_current) {
-            guessCurrentPlace();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -275,14 +275,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
             intent.putExtra(getString(R.string.sight_point), place.getLatLng());
             startActivityForResult(intent, REQUEST_NEW_ICON);
-        }
-        else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK){
+        } else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
             String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
             iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            sightName = data.getExtras().getString(getString(R.string.sight_description));
+            String sightName = data.getExtras().getString(getString(R.string.sight_description));
             showSetDescriptionDialog();
         }
+    }
+
+    private void createSightByAddress() {
+        Intent intent = new Intent(getApplicationContext(), SearchActivity.class);
+        startActivityForResult(intent, REQUEST_NEW_SIGHT_BY_ADDRESS);
     }
 
     private void displayPlace(Place place) {
@@ -310,15 +314,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
-        result.setResultCallback( new ResultCallback<PlaceLikelihoodBuffer>() {
+        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
             @Override
-            public void onResult( PlaceLikelihoodBuffer likelyPlaces ) {
+            public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
                 PlaceLikelihood placeLikelihood = likelyPlaces.get(0);
                 String content = "";
-                if( placeLikelihood != null && placeLikelihood.getPlace() != null && !TextUtils.isEmpty( placeLikelihood.getPlace().getName() ) )
+                if (placeLikelihood != null && placeLikelihood.getPlace() != null && !TextUtils.isEmpty(placeLikelihood.getPlace().getName()))
                     content = "Most likely place: " + placeLikelihood.getPlace().getName() + "\n";
-                if( placeLikelihood != null )
-                    content += "Percent change of being there: " + (int) ( placeLikelihood.getLikelihood() * 100 ) + "%";
+                if (placeLikelihood != null)
+                    content += "Percent change of being there: " + (int) (placeLikelihood.getLikelihood() * 100) + "%";
                 Log.d(LOG_TAG, "guessCurrentPlace content: " + content);
 
                 Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
@@ -376,24 +380,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    private void findPlaceById( String id ) {
-        if( TextUtils.isEmpty( id ) || mGoogleApiClient == null || !mGoogleApiClient.isConnected() )
+    private void findPlaceById(String id) {
+        if (TextUtils.isEmpty(id) || mGoogleApiClient == null || !mGoogleApiClient.isConnected())
             return;
 
-        Places.GeoDataApi.getPlaceById( mGoogleApiClient, id ) .setResultCallback( new ResultCallback<PlaceBuffer>() {
+        Places.GeoDataApi.getPlaceById(mGoogleApiClient, id).setResultCallback(new ResultCallback<PlaceBuffer>() {
             @Override
             public void onResult(PlaceBuffer places) {
-                if( places.getStatus().isSuccess() ) {
-                    Place place = places.get( 0 );
-                    displayPlace( place );
-                   // mPredictTextView.setText( "" );
+                if (places.getStatus().isSuccess()) {
+                    Place place = places.get(0);
+                    displayPlace(place);
+                    // mPredictTextView.setText( "" );
                     //mAdapter.clear();
                 }
 
                 //Release the PlaceBuffer to prevent a memory leak
                 places.release();
             }
-        } );
+        });
     }
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
