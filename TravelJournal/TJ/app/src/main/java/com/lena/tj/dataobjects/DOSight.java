@@ -7,7 +7,7 @@ public class DOSight {
     private String description;
     private double latitude;
     private double longitude;
-    private long icon;
+    private String icon;
     private Long order;
     private Long travelId;
     private HashMap<Long, String> photos;// <Id, Uri>
@@ -16,13 +16,18 @@ public class DOSight {
 
     }
 
-    public DOSight(long id, String description, double latitude, double longitude, long icon,
-                   Long order, HashMap<Long, String> photos) {
+    public DOSight(long id, String description, double latitude, double longitude, String icon) {
         this.id = id;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
         this.icon = icon;
+    }
+
+    public DOSight(long id, String description, double latitude, double longitude, String icon,
+                   Long order, HashMap<Long, String> photos) {
+        this(id, description, latitude, longitude, icon);
+
         this.order = order;
         if (photos == null) {
             this.photos = new HashMap<>();
@@ -63,11 +68,11 @@ public class DOSight {
         this.longitude = longitude;
     }
 
-    public long getIcon() {
+    public String getIcon() {
         return icon;
     }
 
-    public void setIcon(long icon) {
+    public void setIcon(String icon) {
         this.icon = icon;
     }
 

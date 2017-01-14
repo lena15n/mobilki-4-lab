@@ -51,8 +51,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.lena.tj.dataobjects.DOSight;
 import com.lena.tj.db.DbOperations;
 import com.lena.tj.net.PostTask;
+
+import java.util.ArrayList;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PostTask.MyAsyncResponse {
@@ -195,6 +198,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .add(new LatLng(21.291, -157.821))  // Hawaii
                 .add(new LatLng(37.423, -122.091))  // Mountain View
         ); */
+
+
+        openSightsAndTravels();
+    }
+
+    private void openSightsAndTravels() {
+        ArrayList<DOSight> sights = DbOperations.getAllSeparateSights(this);
+
+        for (DOSight sight : sights) {
+            int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
+            map.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
+                    .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                    .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
+                    .setTitle(sight.getDescription());
+        }
     }
 
     @Override
@@ -275,21 +294,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
             intent.putExtra(getString(R.string.sight_point), place.getLatLng());
             startActivityForResult(intent, REQUEST_NEW_ICON);
-        }
-        else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
-            String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
-            iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
+        } else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
+            iconCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
+            iconId = this.getResources().getIdentifier(iconCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            showSetDescriptionDialog();
-        }
-        else if (requestCode == REQUEST_NEW_SIGHT_BY_ADDRESS) {
-            if (resultCode == RESULT_OK) {
-                LatLng placeLatLng = data.getParcelableExtra(getString(R.string.sight_point));
+            insertSightInfoIntoDB();
+        } else if (requestCode == REQUEST_NEW_SIGHT_BY_ADDRESS && resultCode == Activity.RESULT_OK) {
+            LatLng placeLatLng = data.getParcelableExtra(getString(R.string.sight_point));
 
-                Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
-                intent.putExtra(getString(R.string.sight_point), placeLatLng);
-                startActivityForResult(intent, REQUEST_NEW_ICON);
-            }
+            Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+            intent.putExtra(getString(R.string.sight_point), placeLatLng);
+            startActivityForResult(intent, REQUEST_NEW_ICON);
         }
     }
 
@@ -344,7 +359,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void showSetDescriptionDialog() {
+    private void insertSightInfoIntoDB() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.sight_set_description));
         final EditText input = new EditText(this);

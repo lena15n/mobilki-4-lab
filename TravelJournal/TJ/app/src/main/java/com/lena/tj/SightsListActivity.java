@@ -117,7 +117,7 @@ public class SightsListActivity extends AppCompatActivity {
                     String desc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
                     double latitude = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
                     double longitude = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
-                    long icon = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
+                    String icon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
                    // long travel_id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID));
                     long order = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.ORDER));
                     String photoUri = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Photo.URI));
