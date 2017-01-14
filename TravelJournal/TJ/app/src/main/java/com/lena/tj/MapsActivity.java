@@ -242,14 +242,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(this, SightActivity.class);
             startActivity(intent);
         } else if (id == R.id.create_sight_by_address) {
-            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(LatLng latLng) {
-                    Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
-                    intent.putExtra(getString(R.string.sight_point), latLng);
-                    startActivityForResult(intent, REQUEST_NEW_ICON);
-                }
-            });
 
         } else if (id == R.id.travels_list) {
 
@@ -329,6 +321,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     content += "Percent change of being there: " + (int) ( placeLikelihood.getLikelihood() * 100 ) + "%";
                 Log.d(LOG_TAG, "guessCurrentPlace content: " + content);
 
+                Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+                intent.putExtra(getString(R.string.sight_point), placeLikelihood.getPlace().getLatLng());
+                startActivityForResult(intent, REQUEST_NEW_ICON);
 
                 //to avoid memory leaks
                 likelyPlaces.release();
