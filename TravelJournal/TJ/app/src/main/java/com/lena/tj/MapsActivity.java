@@ -51,9 +51,10 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.lena.tj.db.DbOperations;
+import com.lena.tj.net.PostTask;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PostTask.MyAsyncResponse {
     public static final String LOG_TAG = "~Mimi~";
     public static final int REQUEST_NEW_ICON = 1;
     public static final int REQUEST_PERMISSION = 2;
@@ -278,6 +279,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Place place = PlacePicker.getPlace(data, this);
             String toastMsg = String.format("Place: %s", place.getName());
             Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+            new PostTask(this).execute("https://maps.googleapis.com/maps/api/place/add/json?key=" + getString(R.string.GoogleMapsServiceKey), "{\n" +
+                    "  \"location\": {\n" +
+                    "    \"lat\": "+ place.getLatLng().latitude + ",\n" +
+                    "    \"lng\": "+ place.getLatLng().longitude +"\n" +
+                    "  },\n" +
+                    "  \"accuracy\": 50,\n" +
+                    "  \"name\": \"Google Shoes!\",\n" +
+                    "  \"phone_number\": \"(02) 9374 4000\",\n" +
+                    "  \"address\": \"48 Pirrama Road, Pyrmont, NSW 2009, Australia\",\n" +
+                    "  \"types\": [\"shoe_store\"],\n" +
+                    "  \"website\": \"http://www.google.com.au/\",\n" +
+                    "  \"language\": \"en-AU\"\n" +
+                    "}");
         }
     }
 
@@ -416,5 +430,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionSuspended(int i) {
 
+    }
+
+    @Override
+    public void processFinish(String serverJson) {
+        //PlacePicker.
     }
 }
