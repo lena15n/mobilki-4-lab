@@ -275,12 +275,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
             intent.putExtra(getString(R.string.sight_point), place.getLatLng());
             startActivityForResult(intent, REQUEST_NEW_ICON);
-        } else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
+        }
+        else if (requestCode == REQUEST_NEW_ICON && resultCode == Activity.RESULT_OK) {
             String countryCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
             iconId = this.getResources().getIdentifier(countryCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            String sightName = data.getExtras().getString(getString(R.string.sight_description));
             showSetDescriptionDialog();
+        }
+        else if (requestCode == REQUEST_NEW_SIGHT_BY_ADDRESS) {
+            if (resultCode == RESULT_OK) {
+                LatLng placeLatLng = data.getParcelableExtra(getString(R.string.sight_point));
+
+                Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+                intent.putExtra(getString(R.string.sight_point), placeLatLng);
+                startActivityForResult(intent, REQUEST_NEW_ICON);
+            }
         }
     }
 

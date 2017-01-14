@@ -16,6 +16,7 @@
 
 package com.lena.tj;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,7 +28,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -38,31 +38,25 @@ import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 public class SearchActivity extends FragmentActivity implements GoogleApiClient.OnConnectionFailedListener {
-
     /**
      * GoogleApiClient wraps our service connection to Google Play Services and provides access
      * to the user's sign in state as well as the Google's APIs.
      */
     protected GoogleApiClient mGoogleApiClient;
-
     private PlaceAutocompleteAdapter mAdapter;
-
     private AutoCompleteTextView mAutocompleteView;
+    private static final LatLngBounds EMPTY_BOUNDS = null; /*new LatLngBounds(
+            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));*/
 
-    private TextView mPlaceDetailsText;
-
-    private TextView mPlaceDetailsAttribution;
-
-    private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(
-            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
+    private Place placeResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_search);
 
         // Construct a GoogleApiClient for the {@link Places#GEO_DATA_API} using AutoManage
         // functionality, which automatically sets up the API client to handle Activity lifecycle
@@ -73,22 +67,15 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
                 .addApi(Places.GEO_DATA_API)
                 .build();
 
-        setContentView(R.layout.activity_search);
-
         // Retrieve the AutoCompleteTextView that will display Place suggestions.
         mAutocompleteView = (AutoCompleteTextView)findViewById(R.id.autoCompleteTextView);
 
         // Register a listener that receives callbacks when a suggestion has been selected
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
 
-        // Retrieve the TextViews that will display details and attributions of the selected place.
-        mPlaceDetailsText = (TextView) findViewById(R.id.place_details);
-        mPlaceDetailsAttribution = (TextView) findViewById(R.id.place_attribution);
-
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
         // the entire world.
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY,
-                null);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, EMPTY_BOUNDS, null);
         mAutocompleteView.setAdapter(mAdapter);
 
         // Set up the 'clear text' button that clears the text in the autocomplete view
@@ -97,6 +84,19 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
             @Override
             public void onClick(View v) {
                 mAutocompleteView.setText("");
+            }
+        });
+
+        Button chooseButton = (Button) findViewById(R.id.search_button_choose);
+        chooseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent data = new Intent();
+                if (placeResult != null) {
+                    setResult(RESULT_OK, data);
+                }
+                data.putExtra(getString(R.string.sight_point), placeResult.getLatLng());
+                finish();
             }
         });
     }
@@ -150,26 +150,13 @@ public class SearchActivity extends FragmentActivity implements GoogleApiClient.
             if (!places.getStatus().isSuccess()) {
                 // Request did not complete successfully
                 Log.e(MapsActivity.LOG_TAG, "Place query did not complete. Error: " + places.getStatus().toString());
+                placeResult = null;
                 places.release();
                 return;
             }
             // Get the Place object from the buffer.
             final Place place = places.get(0);
-
-            // Format details of the place for display and show it in a TextView.
-            mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(),
-                    place.getId(), place.getAddress(), place.getPhoneNumber(),
-                    place.getWebsiteUri()));
-
-            // Display the third party attributions if set.
-            final CharSequence thirdPartyAttribution = places.getAttributions();
-            if (thirdPartyAttribution == null) {
-                mPlaceDetailsAttribution.setVisibility(View.GONE);
-            } else {
-                mPlaceDetailsAttribution.setVisibility(View.VISIBLE);
-                mPlaceDetailsAttribution.setText(Html.fromHtml(thirdPartyAttribution.toString()));
-            }
-
+            placeResult = place.freeze();
             Log.i(MapsActivity.LOG_TAG, "Place details received: " + place.getName());
 
             places.release();
