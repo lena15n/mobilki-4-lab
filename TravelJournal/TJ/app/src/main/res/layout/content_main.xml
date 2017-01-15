@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:weightSum="1"
-              app:layout_behavior="@string/appbar_scrolling_view_behavior"
-              tools:context="com.lena.tj.MapsActivity"
-              tools:showIn="@layout/app_bar_main">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:id="@+id/maps_linear_layout"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:orientation="vertical"
+             android:weightSum="1"
+             app:layout_behavior="@string/appbar_scrolling_view_behavior"
+             tools:context="com.lena.tj.MapsActivity"
+             tools:showIn="@layout/app_bar_main">
+
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
@@ -18,4 +20,84 @@
               android:layout_height="match_parent"
               tools:context="com.lena.tj.MapsActivity"/>
 
-</LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/maps_from_layout">
+
+            <Button
+                android:id="@+id/maps_chose_from_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/travel_create_from_point"
+                />
+
+            <TextView
+                android:id="@+id/maps_from_textview"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="60dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:background="@color/colorWhiteTransparent"
+                android:text="dfdgfhfgh1111"
+                android:textColor="@color/colorPrimary"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/maps_to_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/maps_from_layout">
+
+            <Button
+                android:id="@+id/maps_choose_to_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/travel_create_to_point"/>
+
+            <TextView
+                android:id="@+id/maps_to_textview"
+                android:layout_marginEnd="60dp"
+                android:padding="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:background="@color/colorWhiteTransparent"
+                android:text="dfdgfhfgh22222"
+                android:textColor="@color/colorPrimary"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/maps_to_layout">
+
+            <Button
+                android:id="@+id/maps_create_travel_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:text="@string/maps_travel_create_button"
+                android:theme="@style/Main.Button"
+                style="@style/Widget.AppCompat.Button.Colored"/>
+
+            <Button
+                android:id="@+id/maps_clear_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="@string/maps_clear_button"
+                android:theme="@style/Main.Button"
+                style="@style/Widget.AppCompat.Button.Colored"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>

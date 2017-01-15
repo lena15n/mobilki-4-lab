@@ -16,4 +16,9 @@
         <item name="android:textSize">20sp</item>
     </style>
 
+    <style name="Main.Button" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 </resources>

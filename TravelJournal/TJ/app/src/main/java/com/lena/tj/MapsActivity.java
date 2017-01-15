@@ -28,7 +28,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -265,8 +269,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         int id = item.getItemId();
 
         if (id == R.id.create_travel) {
-            Intent intent = new Intent(this, SightActivity.class);
-            startActivity(intent);
+            createTravel();
         }
         else if (id == R.id.create_sight_by_address) {
             createSightByAddress();
@@ -293,6 +296,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    private void createTravel() {
+        Button fromButton = new Button(this);
+        fromButton.setText(getString(R.string.travel_create_from_point));
+        fromButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MapsActivity.this, "fromm", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Button toButton = new Button(this);
+        toButton.setText(getString(R.string.travel_create_to_point));
+        toButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MapsActivity.this, "too", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        LinearLayout ll = (LinearLayout)findViewById(R.id.maps_linear_layout);
+        DrawerLayout.LayoutParams lp = new DrawerLayout.LayoutParams(300, DrawerLayout.LayoutParams.WRAP_CONTENT);
+        ll.addView(fromButton, lp);
+        ll.addView(toButton, lp);
+
+        SupportMapFragment mMapFragment = (SupportMapFragment) (getSupportFragmentManager()
+                .findFragmentById(R.id.map));
+        ViewGroup.LayoutParams params = mMapFragment.getView().getLayoutParams();
+        params.height = 800;
+        mMapFragment.getView().setLayoutParams(params);
     }
 
     @Override
