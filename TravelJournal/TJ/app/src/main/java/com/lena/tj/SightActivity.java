@@ -51,6 +51,21 @@ public class SightActivity extends AppCompatActivity {
                 }
             });
         }
+
+        Button showOnMapButton = (Button) findViewById(R.id.sight_button_on_map);
+        showOnMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showSightOnMap();
+            }
+        });
+    }
+
+    private void showSightOnMap() {
+        Gson gson = new Gson();
+        Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra(getString(R.string.sight_data), gson.toJson(sight));
+        startActivity(intent);
     }
 
     private void updateSightView(DOSight newSight) {

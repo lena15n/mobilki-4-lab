@@ -453,6 +453,7 @@ public class DbOperations {
                     String name = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Travel.NAME));
                     Integer color = cursor.getInt(cursor.getColumnIndex(TravelJournalContract.Travel.COLOR));
                     Long sightId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_SIGHT_ID));
+                    String sightDesc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
                     String sightIcon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
                     Double sightLat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
                     Double sightLon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
@@ -465,6 +466,7 @@ public class DbOperations {
                     String photoUri = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Photo.URI));
 
                     Log.d(MapsActivity.LOG_TAG, id + "\t\t" + name + "\t\t" + "\t\t" + sightId +
+                            "\t\t" + sightDesc +
                             "\t\t" + sightIcon + "\t\t" + sightLat + "\t\t" + sightLon + "\t\t" +
                             sightOrder + "\t\t" + photoId + "\t\t" + photoUri);
 
@@ -472,7 +474,7 @@ public class DbOperations {
                         if (prevSightId == sightId) {// same sight
                             travel.addPhotoToTheLastSight(photoId, photoUri);
                         } else {// new sight
-                            DOSight sight = new DOSight(sightId, sightIcon, sightLat, sightLon, sightIcon, id, sightOrder, null);
+                            DOSight sight = new DOSight(sightId, sightDesc, sightLat, sightLon, sightIcon, id, sightOrder, null);
                             if (photoId != null) {
                                 sight.addPhoto(photoId, photoUri);
                             }
@@ -486,7 +488,7 @@ public class DbOperations {
                             travels.add(travel);
                         }
 
-                        DOSight sight = new DOSight(sightId, sightIcon, sightLat, sightLon, sightIcon, id, sightOrder, null);
+                        DOSight sight = new DOSight(sightId, sightDesc, sightLat, sightLon, sightIcon, id, sightOrder, null);
                         if (photoId != null) {
                             sight.addPhoto(photoId, photoUri);
                         }

@@ -194,9 +194,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 new LatLng(53.0, 50.0), 2));
 
         String jsonTravel = getIntent().getStringExtra(getString(R.string.travel_data));
+        String jsonSight = getIntent().getStringExtra(getString(R.string.sight_data));
         if (jsonTravel != null) {
             map.clear();
             drawTravel(new Gson().fromJson(jsonTravel, DOTravel.class));
+        } else if (jsonSight != null) {
+            map.clear();
+            drawSight(new Gson().fromJson(jsonSight, DOSight.class));
         } else {
             openSights();
             openTravels();
@@ -223,6 +227,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (DOTravel travel : travels) {
             drawTravel(travel);
         }
+    }
+
+    private void drawSight(DOSight sight) {
+        map.clear();
+        int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
+        map.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
+                .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
+                .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
+                .setTitle(sight.getDescription());
     }
 
     private void drawTravel(DOTravel travel) {
@@ -319,7 +333,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             displayPlacePickerAndAddSight();
         }
         else if (id == R.id.add_sight_easy) {
-            addSightSimply();
+            addSightEasy();
         }
         else if (id == R.id.add_sight_current) {
             guessCurrentPlace();
@@ -346,7 +360,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-    private void addSightSimply() {
+    private void addSightEasy() {
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
