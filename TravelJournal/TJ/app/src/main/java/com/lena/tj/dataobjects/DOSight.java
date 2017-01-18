@@ -22,6 +22,10 @@ public class DOSight {
         this.latitude = latitude;
         this.longitude = longitude;
         this.icon = icon;
+
+        if (photos == null) {
+            this.photos = new HashMap<>();
+        } 
     }
 
     public DOSight(long id, String description, double latitude, double longitude, String icon, Long travelId,
