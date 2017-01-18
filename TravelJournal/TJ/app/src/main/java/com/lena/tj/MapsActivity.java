@@ -76,6 +76,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int REQUEST_PERMISSION = 2;
     private static final int PLACE_PICKER_REQUEST = 3;
     private static final int REQUEST_NEW_SIGHT_BY_ADDRESS = 4;
+    private static final float ANCHOR_X = 0.52f;
+    private static final float ANCHOR_Y = 0.8f;
 
     private SupportMapFragment mapFragment;
     private GoogleMap map;
@@ -186,7 +188,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));//.newLatLng(sydney));
         map.addMarker(new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_tv_dark))
-                .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
                 .position(new LatLng(41.889, -87.622)));
         //.flat(true)
         //.rotation(245));
@@ -226,7 +228,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
             map.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
-                    .anchor(0.1f, 0.1f) // Anchors the marker on the bottom left
+                    .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
                     .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
                     .setTitle(sight.getDescription());
         }
@@ -242,7 +244,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
                 map.addMarker(new MarkerOptions()
                         .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
-                        .anchor(0.52f, 0.8f) // Anchors the marker on the bottom left
+                        .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
                         .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
                         .setTitle(sight.getDescription());
                 if (prevLat != null) {
@@ -619,7 +621,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 map.addMarker(new MarkerOptions()
                         .title(sightDesc)
                         .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, iconId)))
-                        .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                        .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
                         .position(target));
                 map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
