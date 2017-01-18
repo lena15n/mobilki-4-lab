@@ -242,7 +242,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
                 map.addMarker(new MarkerOptions()
                         .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
-                        .anchor(0.1f, 0.1f) // Anchors the marker on the bottom left
+                        .anchor(0.52f, 0.8f) // Anchors the marker on the bottom left
                         .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
                         .setTitle(sight.getDescription());
                 if (prevLat != null) {
@@ -675,8 +675,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             drawable = (DrawableCompat.wrap(drawable)).mutate();
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getMinimumWidth(),
+                drawable.getMinimumHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
