@@ -41,7 +41,7 @@ public class SightActivity extends AppCompatActivity {
         }
 
         Button deleteButton = (Button) findViewById(R.id.sight_button_delete);
-        if (mode.equals(getString(R.string.travel))) {
+        if (mode.equals(getString(R.string.travel)) || sight.getTravelId() != null) {
             deleteButton.setEnabled(false);
         } else {
             deleteButton.setOnClickListener(new View.OnClickListener() {

@@ -141,9 +141,11 @@ public class DbOperations {
         String[] projection = {
                 TravelJournalContract.Sight._ID,
                 TravelJournalContract.Sight.DESCRIPTION,
-                TravelJournalContract.Sight.ICON,
                 TravelJournalContract.Sight.LATITUDE,
-                TravelJournalContract.Sight.LONGITUDE
+                TravelJournalContract.Sight.LONGITUDE,
+                TravelJournalContract.Sight.ICON,
+                TravelJournalContract.Sight.TRAVEL_ID,
+                TravelJournalContract.Sight.ORDER
         };
 
         // How you want the results sorted in the resulting Cursor
@@ -165,20 +167,24 @@ public class DbOperations {
                 do {
                     long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
                     String desc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
-                    String icon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
                     double lat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
                     double lon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
+                    String icon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
+                    Long travelId = null;
+                    if (!cursor.isNull(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID))){
+                        travelId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID));
+                    }
+                    Long order = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.ORDER));
 
                     Log.d(MapsActivity.LOG_TAG, "Record: id = " + id + ", name: " + desc + ", icon: " + icon +
                             "\nlat: " + lat + ", long: " + lon);
 
-                    sights.add(new DOSight(id, desc, lat, lon, icon));
+                    sights.add(new DOSight(id, desc, lat, lon, icon, travelId, order, null));
                 }
                 while (cursor.moveToNext());
             }
+            cursor.close();
         }
-
-        cursor.close();
         db.close();
 
         return sights;
