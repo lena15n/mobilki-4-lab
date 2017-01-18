@@ -2,7 +2,6 @@ package com.lena.tj;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -18,8 +17,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.lena.tj.dataobjects.DOSight;
-import com.lena.tj.db.TravelJournalContract;
-import com.lena.tj.db.TravelJournalDbHelper;
+import com.lena.tj.db.DbOperations;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -49,7 +47,7 @@ public class SightActivity extends AppCompatActivity {
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    deleteSight(sight);
+                    deleteSight();
                 }
             });
         }
@@ -98,30 +96,32 @@ public class SightActivity extends AppCompatActivity {
     }
 
     private void showImages() {
-        for (Map.Entry<Long, String> photoObj : sight.getPhotos().entrySet()) {
-            final Uri path = Uri.parse(photoObj.getValue());
-            InputStream imageStream = null;
-            try {
-                imageStream = getContentResolver().openInputStream(path);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            Bitmap photo = BitmapFactory.decodeStream(imageStream);
-            ImageView imageView = new ImageView(this);
-            imageView.setLayoutParams(new android.view.ViewGroup.LayoutParams(200, 200));
-            imageView.setImageBitmap(photo);
-            imageView.setPadding(10, 10, 5, 0);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent();
-                    intent.setAction(Intent.ACTION_VIEW);
-                    intent.setDataAndType(path, "image");
-                    startActivity(intent);
+        if (sight.getPhotos() != null) {
+            for (Map.Entry<Long, String> photoObj : sight.getPhotos().entrySet()) {
+                final Uri path = Uri.parse(photoObj.getValue());
+                InputStream imageStream = null;
+                try {
+                    imageStream = getContentResolver().openInputStream(path);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
                 }
-            });
-            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.show_imageviews_layout);
-            linearLayout.addView(imageView);
+                Bitmap photo = BitmapFactory.decodeStream(imageStream);
+                ImageView imageView = new ImageView(this);
+                imageView.setLayoutParams(new android.view.ViewGroup.LayoutParams(200, 200));
+                imageView.setImageBitmap(photo);
+                imageView.setPadding(10, 10, 5, 0);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setDataAndType(path, "image");
+                        startActivity(intent);
+                    }
+                });
+                LinearLayout linearLayout = (LinearLayout) findViewById(R.id.show_imageviews_layout);
+                linearLayout.addView(imageView);
+            }
         }
     }
 
@@ -142,18 +142,10 @@ public class SightActivity extends AppCompatActivity {
         }
     }
 
-    private void deleteSight(DOSight mSight) {
-        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        for (Map.Entry<Long, String> photo : mSight.getPhotos().entrySet()) {
-            int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
-                    TravelJournalContract.Photo._ID + " = " + photo.getKey(), null);
-        }
+    private void deleteSight() {
+        DbOperations.deleteSight(this, sight);
 
-        int delCount = db.delete(TravelJournalContract.Sight.TABLE_NAME,
-                TravelJournalContract.Sight._ID + " = " + mSight.getId(), null);
-
-        Intent intent = new Intent(this, SightsListActivity.class);
+        Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
     }
 }

@@ -330,6 +330,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         else if (id == R.id.sights_list) {
             startActivity(new Intent(this, SightsListActivity.class));
         }
+        else if (id == R.id.separated_sights_on_map) {
+            map.clear();
+            openSights();
+        }
         else if (id == R.id.the_nearest_travel_to_me) {
 
         }

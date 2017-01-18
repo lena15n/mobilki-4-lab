@@ -16,6 +16,7 @@
     <string name="action_create_sight_by_address">Create sight by address</string>
     <string name="action_travels_list">Show travels list</string>
     <string name="action_sights_list">Show sights list</string>
+    <string name="action_separated_sights_on_map">Separated sights on map</string>
     <string name="action_the_nearest_travel_to_me">Show the nearest travel to me</string>
     <string name="action_add_sight">Create sight on the map</string>
     <string name="action_add_sight_easy">Create sight on the map easy</string>

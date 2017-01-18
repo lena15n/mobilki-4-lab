@@ -50,6 +50,13 @@
             android:title="@string/action_sights_list"/>
     </group>
 
+    <group  android:id="@+id/group6_1"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/separated_sights_on_map"
+            android:title="@string/action_separated_sights_on_map"/>
+    </group>
+
     <group  android:id="@+id/group7"
             android:checkableBehavior="single">
         <item
