@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -14,6 +15,7 @@ import com.lena.tj.dataobjects.DOTravel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static com.lena.tj.db.TravelJournalContract.Sight.SELECT_FIRST_SIGHT_OF_TRAVEL;
 import static com.lena.tj.db.TravelJournalContract.Sight.SELECT_LAST_SIGHT_OF_TRAVEL;
@@ -189,12 +191,14 @@ public class DbOperations {
      * and modify old travel if add new point to start or end of old travel
      * Only one travel maybe between same sights/points
      */
-    public static boolean createTravel(Context context, LatLng from, LatLng to, String name) {
+    public static int createTravel(Context context, LatLng from, LatLng to, String name) {
         TravelJournalDbHelper mDbHelper = new TravelJournalDbHelper(context);
         long newTravelId = -1;
         DOSight fromSight = null;
         DOSight toSight = null;
         boolean result = false;
+
+        int color = -1;
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] projection = new String[]{
@@ -245,11 +249,14 @@ public class DbOperations {
         if (fromSight != null && toSight != null) {
             if (fromSight.getTravelId() == null && toSight.getTravelId() == null) {
                 // Create new Travel
+                Random rand = new Random();
+                color = Color.argb(255, rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
 
                 db = mDbHelper.getWritableDatabase();
                 //insert into Travel
                 ContentValues values = new ContentValues();
                 values.put(TravelJournalContract.Travel.NAME, name);
+                values.put(TravelJournalContract.Travel.COLOR, color);
                 newTravelId = db.insert(TravelJournalContract.Travel.TABLE_NAME, null, values);
 
                 values = new ContentValues();
@@ -277,6 +284,16 @@ public class DbOperations {
                         if (orderCur.moveToFirst()) {
                             firstSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
                         }
+                        orderCur.close();
+                    }
+
+                    Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
+                            new String[]{String.valueOf(fromSight.getTravelId())});
+                    if (colorCur != null) {
+                        if (colorCur.moveToFirst()) {
+                            color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
+                        }
+                        colorCur.close();
                     }
 
                     if (firstSightId == fromSight.getId()) {// if sight id == 1
@@ -305,6 +322,17 @@ public class DbOperations {
                             lastSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
                             lastSightOrder = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight.TEMP_COLUMN));
                         }
+
+                        orderCur.close();
+                    }
+
+                    Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
+                            new String[]{String.valueOf(fromSight.getTravelId())});
+                    if (colorCur != null) {
+                        if (colorCur.moveToFirst()) {
+                            color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
+                        }
+                        colorCur.close();
                     }
 
                     if (lastSightId == fromSight.getId()) {// if sight id == 1
@@ -325,7 +353,7 @@ public class DbOperations {
 
         db.close();
 
-        return result;
+        return result?color:-1;// return color of travel only if success
     }
 
     public static boolean isTravelNameExists(Context context, LatLng from, LatLng to) {
@@ -374,6 +402,7 @@ public class DbOperations {
                 do {
                     Long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Travel._ID));
                     String name = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Travel.NAME));
+                    Integer color = cursor.getInt(cursor.getColumnIndex(TravelJournalContract.Travel.COLOR));
                     Long sightId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_SIGHT_ID));
                     String sightIcon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
                     Double sightLat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
@@ -412,7 +441,7 @@ public class DbOperations {
                         if (photoId != null) {
                             sight.addPhoto(photoId, photoUri);
                         }
-                        travel = new DOTravel(id, name, null);
+                        travel = new DOTravel(id, name, color, null);
                         travel.addSight(sight);
 
                         prevSightId = sightId;

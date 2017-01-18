@@ -262,7 +262,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
                     .setTitle(sight.getDescription());
             if (prevLat != null) {
-                drawLine(new LatLng(prevLat, prevLon), new LatLng(sight.getLatitude(), sight.getLongitude()));
+                drawLine(new LatLng(prevLat, prevLon), new LatLng(sight.getLatitude(), sight.getLongitude()), travel.getColor());
                 prevLat = sight.getLatitude();
                 prevLon = sight.getLongitude();
             } else {
@@ -508,11 +508,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void drawLine(LatLng from, LatLng to) {
+    private void drawLine(LatLng from, LatLng to,  int color) {
         PolylineOptions polylineOptions = new PolylineOptions();
         polylineOptions.add(from, to);
-        Random rnd = new Random();
-        int lineColor = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        int lineColor;
+        if (color == -1) {
+            Random rnd = new Random();
+            lineColor = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        } else {
+            lineColor = color;
+        }
         polylineOptions.color(lineColor);
         map.addPolyline(polylineOptions);
 
@@ -611,11 +616,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     travelName = input.getText().toString();
-                    if (!DbOperations.createTravel(MapsActivity.this, from, to, travelName))
-                        Toast.makeText(MapsActivity.this, "Can t create travel..", Toast.LENGTH_LONG).show();
+                    int color = DbOperations.createTravel(MapsActivity.this, from, to, travelName);
+                    if (color != -1)
+                        drawLine(from, to, color);
                     else {
-                        //draw line on map
-                        drawLine(from, to);
+                        Toast.makeText(MapsActivity.this, "Can t create travel..", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -634,8 +639,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             builder.show();
         } else {
-            if (DbOperations.createTravel(MapsActivity.this, from, to, null)){
-                drawLine(from, to);
+            int color = DbOperations.createTravel(MapsActivity.this, from, to, null);
+            if (color != -1){
+                drawLine(from, to, color);
             }
             else {
                 Toast.makeText(MapsActivity.this, "Can t modify travel..", Toast.LENGTH_LONG).show();

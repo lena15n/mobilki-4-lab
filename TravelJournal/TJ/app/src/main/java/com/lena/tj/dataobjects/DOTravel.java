@@ -5,15 +5,17 @@ import java.util.ArrayList;
 public class DOTravel {
     private long id;
     private String name;
+    private int color;
     private ArrayList<DOSight> sights;
 
-    public DOTravel(long id, String name) {
+    public DOTravel(long id, String name, int color) {
         this.id = id;
         this.name = name;
+        this.color = color;
     }
 
-    public DOTravel(long id, String name, ArrayList<DOSight> sights) {
-        this(id, name);
+    public DOTravel(long id, String name, int color, ArrayList<DOSight> sights) {
+        this(id, name, color);
 
         this.sights = sights == null ? new ArrayList<DOSight>() : sights;
     }
@@ -50,5 +52,13 @@ public class DOTravel {
 
     public void setSights(ArrayList<DOSight> sights) {
         this.sights = sights;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 }

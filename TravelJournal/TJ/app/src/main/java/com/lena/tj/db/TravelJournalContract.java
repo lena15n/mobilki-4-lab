@@ -18,16 +18,19 @@ public final class TravelJournalContract {
     public static final class Travel implements BaseColumns {
         public static final String TABLE_NAME       = "travel";
         public static final String NAME = "name";
+        public static final String COLOR = "color";
 
         public static final String SQL_CREATE_TRAVEL = "CREATE TABLE " +
                 TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
-                NAME + TEXT_TYPE + " )";
+                NAME + TEXT_TYPE + COMMA_SEP +
+                COLOR + INTEGER_TYPE + " )";
         public static final String SQL_DELETE_TRAVEL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
         public static final String SQL_GET_ALL_TRAVELS = " SELECT " +
                 _ID + COMMA_SEP +
                 NAME + COMMA_SEP +
+                COLOR + COMMA_SEP +
                 Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_SIGHT_ID + COMMA_SEP +
                 Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
                 Sight.TEMP_TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
@@ -55,6 +58,10 @@ public final class TravelJournalContract {
                 " ) AS " + Sight.TEMP_TABLE_NAME + " ON " +
                 TABLE_NAME + "." + _ID + " = " + Sight.TEMP_TABLE_NAME + "." + Sight.TRAVEL_ID +
                 " ORDER BY " + _ID + ", " + Sight.ORDER;
+
+        public static final String SELECT_COLOR_OF_TRAVEL = " SELECT " + COLOR +
+                " FROM " + TABLE_NAME +
+                " WHERE " + _ID + " = ?";
 
         private Travel (){}
     }
