@@ -634,8 +634,8 @@ public class DbOperations {
 
         TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Log.d(MapsActivity.LOG_TAG, TravelJournalContract.Travel.SQL_GET_ALL_TRAVELS_ALIAS);
-        Cursor cursor = db.rawQuery(TravelJournalContract.Travel.SQL_GET_ALL_TRAVELS_ALIAS,
+        Log.d(MapsActivity.LOG_TAG, TravelJournalContract.Travel.SQL_GET_THE_NEAREST_TRAVEL);
+        Cursor cursor = db.rawQuery(TravelJournalContract.Travel.SQL_GET_THE_NEAREST_TRAVEL,
                 new String[]{
                         String.valueOf(latLng.latitude),  String.valueOf(latLng.latitude),
                         String.valueOf(latLng.longitude), String.valueOf(latLng.longitude)
@@ -685,33 +685,5 @@ public class DbOperations {
 
         db.close();
         return travel;
-    }
-
-
-    public static void getTheNearestTravel1(Context context, LatLng latLng) {
-        long prevSightId = -1;
-
-        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(TravelJournalContract.Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID,
-                new String[]{
-                        String.valueOf(latLng.latitude),  String.valueOf(latLng.latitude),
-                        String.valueOf(latLng.longitude), String.valueOf(latLng.longitude)
-                });
-        Long travelId = null;
-        Long sightID = null;
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-
-                    travelId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID));
-
-
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        }
-
-        db.close();
     }
 }

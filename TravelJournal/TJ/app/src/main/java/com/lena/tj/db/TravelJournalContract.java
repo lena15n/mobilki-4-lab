@@ -64,49 +64,9 @@ public final class TravelJournalContract {
                 " FROM " + TABLE_NAME +
                 " WHERE " + _ID + " = ?";
 
-        public static final String SQL_GET_ALL_TRAVELS_ALIAS = "SELECT * " +
-                "FROM ( SELECT " +
-                    _ID + COMMA_SEP +
-                    NAME + COMMA_SEP +
-                    COLOR + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_SIGHT_ID + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.ICON + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.LONGITUDE + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.ORDER + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_PHOTO_ID + " AS " + Sight.TEMP_PHOTO_ID + COMMA_SEP +
-                    Sight.TEMP_TABLE_NAME + "." + Photo.URI +
-                    " FROM " + TABLE_NAME +
-                    " LEFT JOIN ( SELECT " +
-                    Sight.TABLE_NAME + "." + Sight._ID + " AS " + Sight.TEMP_SIGHT_ID + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.ICON + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.LONGITUDE + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.ORDER + COMMA_SEP +
-                    Sight.TABLE_NAME + "." + Sight.TRAVEL_ID + COMMA_SEP +
-                    Photo.TABLE_NAME + "." + Photo._ID + " AS " + Sight.TEMP_PHOTO_ID + COMMA_SEP +
-                    Photo.TABLE_NAME + "." + Photo.URI +
-                    " FROM " + Sight.TABLE_NAME + " LEFT JOIN " + Photo.TABLE_NAME +
-                    " ON " + Sight.TABLE_NAME + "." + Sight._ID + " = " +
-                    Photo.TABLE_NAME + "." + Photo._ID +
-                    " ) AS " + Sight.TEMP_TABLE_NAME + " ON " +
-                    TABLE_NAME + "." + _ID + " = " + Sight.TEMP_TABLE_NAME + "." + Sight.TRAVEL_ID +
-                    " ORDER BY " + _ID + ", " + Sight.ORDER + ") " +
+        public static final String SQL_GET_THE_NEAREST_TRAVEL = "SELECT * " +
+                "FROM ( " + SQL_GET_ALL_TRAVELS + ") " +
                 " WHERE " + _ID + " = (" + Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + ") ";
-
-        public static final String SELECT_THE_NEAREST_TRAVEL = " SELECT * " +
-                " FROM (" + SQL_GET_ALL_TRAVELS + ") LEFT JOIN (" +
-                Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + ") AS " + Sight.TEMP_TABLE_NAME +
-                " ON " + _ID + " = " + Sight.TRAVEL_ID;
-
-        /*public static final String SELECT_THE_NEAREST_TRAVEL = " SELECT * " +
-                " FROM (" + SQL_GET_ALL_TRAVELS_ALIAS + ") LEFT JOIN (" +
-                Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + ") AS " + Sight.TEMP_TABLE_NAME +
-                " ON " + TEMP_ID + " = " + Sight.TRAVEL_ID;*/
 
         private Travel (){}
     }
