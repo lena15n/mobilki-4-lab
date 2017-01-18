@@ -373,8 +373,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
                 PlaceLikelihood placeLikelihood = likelyPlaces.get(0);
                 currentLocation[0] = placeLikelihood.getPlace().getLatLng();
-                DOTravel travel = null;
-                DbOperations.getTheNearestTravel1(MapsActivity.this, currentLocation[0]);
+                DOTravel travel = DbOperations.getTheNearestTravel(MapsActivity.this, currentLocation[0]);
                 map.clear();
                 drawTravel(travel);
                 Toast.makeText(MapsActivity.this, getString(R.string.maps_nearest_travel), Toast.LENGTH_LONG).show();

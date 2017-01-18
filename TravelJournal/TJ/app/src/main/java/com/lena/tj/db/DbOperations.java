@@ -634,6 +634,7 @@ public class DbOperations {
 
         TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Log.d(MapsActivity.LOG_TAG, TravelJournalContract.Travel.SQL_GET_ALL_TRAVELS_ALIAS);
         Cursor cursor = db.rawQuery(TravelJournalContract.Travel.SQL_GET_ALL_TRAVELS_ALIAS,
                 new String[]{
                         String.valueOf(latLng.latitude),  String.valueOf(latLng.latitude),
@@ -704,7 +705,6 @@ public class DbOperations {
                 do {
 
                     travelId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID));
-                    sightID = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
 
 
                 } while (cursor.moveToNext());

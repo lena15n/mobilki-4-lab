@@ -96,8 +96,7 @@ public final class TravelJournalContract {
                     " ) AS " + Sight.TEMP_TABLE_NAME + " ON " +
                     TABLE_NAME + "." + _ID + " = " + Sight.TEMP_TABLE_NAME + "." + Sight.TRAVEL_ID +
                     " ORDER BY " + _ID + ", " + Sight.ORDER + ") " +
-                " WHERE " + _ID + " = (" + " SELECT " + Sight.TRAVEL_ID +
-                " FROM (" + Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + "))";
+                " WHERE " + _ID + " = (" + Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + ") ";
 
         public static final String SELECT_THE_NEAREST_TRAVEL = " SELECT * " +
                 " FROM (" + SQL_GET_ALL_TRAVELS + ") LEFT JOIN (" +
@@ -189,7 +188,9 @@ public final class TravelJournalContract {
                 " FROM " + TABLE_NAME +
                 " WHERE " + TRAVEL_ID + " IS NOT NULL ";
 
-        public static final String SQL_FIND_THE_NEAREST_TRAVEL_ID = " SELECT " +
+        public static final String SQL_FIND_THE_NEAREST_TRAVEL_ID = "SELECT " +
+                TRAVEL_ID +
+                " FROM (SELECT " +
                 TRAVEL_ID + COMMA_SEP +
                 _ID + COMMA_SEP +
                 " MIN( " +
@@ -197,7 +198,7 @@ public final class TravelJournalContract {
                     "(" + LONGITUDE + " - ?" + ")*(" + LONGITUDE + " - ?)" +
                 ") AS " + TEMP_COLUMN +
                 " FROM " + TABLE_NAME +
-                " WHERE " + TRAVEL_ID + " IS NOT NULL ";
+                " WHERE " + TRAVEL_ID + " IS NOT NULL)";
 
         private Sight (){}
     }
