@@ -349,7 +349,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             openSights();
         }
         else if (id == R.id.the_nearest_travel_to_me) {
-
+            getTheNearestTravelToMe();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -358,6 +358,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    private void getTheNearestTravelToMe() {
+        final LatLng[] currentLocation = new LatLng[1];
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
+            return;
+        }
+        PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+            @Override
+            public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
+                PlaceLikelihood placeLikelihood = likelyPlaces.get(0);
+                currentLocation[0] = placeLikelihood.getPlace().getLatLng();
+                DOTravel travel = null;
+                DbOperations.getTheNearestTravel1(MapsActivity.this, currentLocation[0]);
+                map.clear();
+                drawTravel(travel);
+                Toast.makeText(MapsActivity.this, getString(R.string.maps_nearest_travel), Toast.LENGTH_LONG).show();
+
+                //to avoid memory leaks
+                likelyPlaces.release();
+            }
+        });
     }
 
     private void addSightEasy() {

@@ -94,10 +94,9 @@ public class DbOperations {
                     int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
                             TravelJournalContract.Photo._ID + " = " + photo.getKey(), null);
                 }
-
-                int delCount = db.delete(TravelJournalContract.Sight.TABLE_NAME,
-                        TravelJournalContract.Photo._ID + " = " + sight.getId(), null);
             }
+            int delCount = db.delete(TravelJournalContract.Sight.TABLE_NAME,
+                    TravelJournalContract.Photo._ID + " = " + sight.getId(), null);
         }
 
         int delCount = db.delete(TravelJournalContract.Travel.TABLE_NAME,
@@ -129,7 +128,7 @@ public class DbOperations {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
-                        TravelJournalContract.Photo._ID + " = " + photoId, null);
+                TravelJournalContract.Photo._ID + " = " + photoId, null);
 
         db.close();
     }
@@ -171,7 +170,7 @@ public class DbOperations {
                     double lon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
                     String icon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
                     Long travelId = null;
-                    if (!cursor.isNull(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID))){
+                    if (!cursor.isNull(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID))) {
                         travelId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID));
                     }
                     Long order = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.ORDER));
@@ -327,88 +326,87 @@ public class DbOperations {
                 db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
                         String.valueOf(toSight.getId())});
                 result = true;
-            } else
-                if (fromSight.getTravelId() == null && toSight.getTravelId() != null) {
-                    // Modify old travel
+            } else if (fromSight.getTravelId() == null && toSight.getTravelId() != null) {
+                // Modify old travel
 
-                    Cursor orderCur = db.rawQuery(SELECT_FIRST_SIGHT_OF_TRAVEL,
-                            new String[]{String.valueOf(toSight.getTravelId())});
-                    long firstSightId = -1;
+                Cursor orderCur = db.rawQuery(SELECT_FIRST_SIGHT_OF_TRAVEL,
+                        new String[]{String.valueOf(toSight.getTravelId())});
+                long firstSightId = -1;
 
-                    if (orderCur != null) {
-                        if (orderCur.moveToFirst()) {
-                            firstSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
-                        }
-                        orderCur.close();
+                if (orderCur != null) {
+                    if (orderCur.moveToFirst()) {
+                        firstSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
+                    }
+                    orderCur.close();
+                }
+
+                Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
+                        new String[]{String.valueOf(toSight.getTravelId())});
+                if (colorCur != null) {
+                    if (colorCur.moveToFirst()) {
+                        color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
+                    }
+                    colorCur.close();
+                }
+
+                if (firstSightId == toSight.getId()) {// if sight id == 1
+                    db = mDbHelper.getWritableDatabase();
+                    long travelId = toSight.getTravelId();
+                    db.execSQL(UPDATE_INCREMENT_ORDER, new String[]{
+                            String.valueOf(travelId)});
+
+                    ContentValues values = new ContentValues();
+                    values.put(TravelJournalContract.Sight.TRAVEL_ID, travelId);
+                    values.put(TravelJournalContract.Sight.ORDER, 1);
+                    String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
+                    int res = db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
+                            String.valueOf(fromSight.getId())});
+                    result = true;
+                }
+            } else if (fromSight.getTravelId() != null && toSight.getTravelId() == null) {
+                // Modify old travel
+
+                Cursor orderCur = db.rawQuery(SELECT_LAST_SIGHT_OF_TRAVEL,
+                        new String[]{String.valueOf(fromSight.getTravelId())});
+                long lastSightOrder = -1;
+                long lastSightId = -1;
+
+                if (orderCur != null) {
+                    if (orderCur.moveToFirst()) {
+                        lastSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
+                        lastSightOrder = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight.TEMP_COLUMN));
                     }
 
-                    Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
-                            new String[]{String.valueOf(toSight.getTravelId())});
-                    if (colorCur != null) {
-                        if (colorCur.moveToFirst()) {
-                            color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
-                        }
-                        colorCur.close();
+                    orderCur.close();
+                }
+
+                Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
+                        new String[]{String.valueOf(fromSight.getTravelId())});
+                if (colorCur != null) {
+                    if (colorCur.moveToFirst()) {
+                        color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
                     }
+                    colorCur.close();
+                }
 
-                    if (firstSightId == toSight.getId()) {// if sight id == 1
-                        db = mDbHelper.getWritableDatabase();
-                        long travelId = toSight.getTravelId();
-                        db.execSQL(UPDATE_INCREMENT_ORDER, new String[]{
-                                String.valueOf(travelId)});
+                if (lastSightId == fromSight.getId()) {// if sight id == 1
+                    db = mDbHelper.getWritableDatabase();
 
-                        ContentValues values = new ContentValues();
-                        values.put(TravelJournalContract.Sight.TRAVEL_ID, travelId);
-                        values.put(TravelJournalContract.Sight.ORDER, 1);
-                        String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
-                        int res = db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
-                                String.valueOf(fromSight.getId())});
-                        result = true;
-                    }
-                } else if (fromSight.getTravelId() != null && toSight.getTravelId() == null) {
-                    // Modify old travel
+                    ContentValues values = new ContentValues();
+                    values.put(TravelJournalContract.Sight.TRAVEL_ID, fromSight.getTravelId());
+                    values.put(TravelJournalContract.Sight.ORDER, lastSightOrder + 1);
+                    String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
+                    db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
+                            String.valueOf(toSight.getId())});
 
-                    Cursor orderCur = db.rawQuery(SELECT_LAST_SIGHT_OF_TRAVEL,
-                            new String[]{String.valueOf(fromSight.getTravelId())});
-                    long lastSightOrder = -1;
-                    long lastSightId = -1;
-
-                    if (orderCur != null) {
-                        if (orderCur.moveToFirst()) {
-                            lastSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
-                            lastSightOrder = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight.TEMP_COLUMN));
-                        }
-
-                        orderCur.close();
-                    }
-
-                    Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
-                            new String[]{String.valueOf(fromSight.getTravelId())});
-                    if (colorCur != null) {
-                        if (colorCur.moveToFirst()) {
-                            color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
-                        }
-                        colorCur.close();
-                    }
-
-                    if (lastSightId == fromSight.getId()) {// if sight id == 1
-                        db = mDbHelper.getWritableDatabase();
-
-                        ContentValues values = new ContentValues();
-                        values.put(TravelJournalContract.Sight.TRAVEL_ID, fromSight.getTravelId());
-                        values.put(TravelJournalContract.Sight.ORDER, lastSightOrder + 1);
-                        String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
-                        db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
-                                String.valueOf(toSight.getId())});
-
-                        result = true;
-                    }
+                    result = true;
                 }
             }
+        }
 
         db.close();
 
-        return result?color:-1;// return color of travel only if success
+        return result ? color : -1;// return color of travel only if success
     }
 
     public static boolean isTravelNameExists(Context context, LatLng from, LatLng to) {
@@ -488,8 +486,7 @@ public class DbOperations {
 
                             prevSightId = sightId;
                         }
-                    }
-                    else {
+                    } else {
                         if (travel != null) {
                             travels.add(travel);
                         }
@@ -619,13 +616,100 @@ public class DbOperations {
         TravelJournalDbHelper mDbHelper = new TravelJournalDbHelper(context);
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         int count = 0;
-        Cursor cursor = db.rawQuery(TravelJournalContract.Sight.SELECT_SMTH, new String[] {});
+        Cursor cursor = db.rawQuery(TravelJournalContract.Sight.SELECT_SMTH, new String[]{});
         if (cursor != null) {
             if (cursor.moveToFirst()) {
 
                 count++;
                 Log.d(MapsActivity.LOG_TAG, "нашел" + count);
             }
+        }
+
+        db.close();
+    }
+
+    public static DOTravel getTheNearestTravel(Context context, LatLng latLng) {
+        DOTravel travel = null;
+        long prevSightId = -1;
+
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(TravelJournalContract.Travel.SQL_GET_ALL_TRAVELS_ALIAS,
+                new String[]{
+                        String.valueOf(latLng.latitude),  String.valueOf(latLng.latitude),
+                        String.valueOf(latLng.longitude), String.valueOf(latLng.longitude)
+                });
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    Long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Travel._ID));
+                    String name = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Travel.NAME));
+                    int color = cursor.getInt(cursor.getColumnIndex(TravelJournalContract.Travel.COLOR));
+                    Long sightId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_SIGHT_ID));
+                    String sightDesc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
+                    String sightIcon = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.ICON));
+                    Double sightLat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
+                    Double sightLon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
+                    Long sightOrder = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.ORDER));
+                    Long photoId = null;
+                    if (!cursor.isNull(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_PHOTO_ID))) {
+                        photoId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_PHOTO_ID));
+                    }
+
+                    String photoUri = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Photo.URI));
+
+                    Log.d(MapsActivity.LOG_TAG, id + "\t\t" + name + "\t\t" + "\t\t" + sightId +
+                            "\t\t" + sightDesc +
+                            "\t\t" + sightIcon + "\t\t" + sightLat + "\t\t" + sightLon + "\t\t" +
+                            sightOrder + "\t\t" + photoId + "\t\t" + photoUri);
+
+                    if (prevSightId == sightId) {// same sight
+                        travel.addPhotoToTheLastSight(photoId, photoUri);
+                    } else {// new sight
+                        DOSight sight = new DOSight(sightId, sightDesc, sightLat, sightLon, sightIcon, id, sightOrder, null);
+                        if (photoId != null) {
+                            sight.addPhoto(photoId, photoUri);
+                        }
+                        if (travel == null) {
+                            travel = new DOTravel(id, name, color, null);
+                        }
+                        travel.addSight(sight);
+                        prevSightId = sightId;
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+
+        db.close();
+        return travel;
+    }
+
+
+    public static void getTheNearestTravel1(Context context, LatLng latLng) {
+        long prevSightId = -1;
+
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(TravelJournalContract.Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID,
+                new String[]{
+                        String.valueOf(latLng.latitude),  String.valueOf(latLng.latitude),
+                        String.valueOf(latLng.longitude), String.valueOf(latLng.longitude)
+                });
+        Long travelId = null;
+        Long sightID = null;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+
+                    travelId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TRAVEL_ID));
+                    sightID = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
+
+
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
         }
 
         db.close();

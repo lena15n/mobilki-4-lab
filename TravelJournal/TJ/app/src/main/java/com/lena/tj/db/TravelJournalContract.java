@@ -19,6 +19,7 @@ public final class TravelJournalContract {
         public static final String TABLE_NAME       = "travel";
         public static final String NAME = "name";
         public static final String COLOR = "color";
+        public static final String TEMP_ID = "tr_id";
 
         public static final String SQL_CREATE_TRAVEL = "CREATE TABLE " +
                 TABLE_NAME + " (" +
@@ -62,6 +63,51 @@ public final class TravelJournalContract {
         public static final String SELECT_COLOR_OF_TRAVEL = " SELECT " + COLOR +
                 " FROM " + TABLE_NAME +
                 " WHERE " + _ID + " = ?";
+
+        public static final String SQL_GET_ALL_TRAVELS_ALIAS = "SELECT * " +
+                "FROM ( SELECT " +
+                    _ID + COMMA_SEP +
+                    NAME + COMMA_SEP +
+                    COLOR + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_SIGHT_ID + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.ICON + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.LONGITUDE + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.ORDER + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_PHOTO_ID + " AS " + Sight.TEMP_PHOTO_ID + COMMA_SEP +
+                    Sight.TEMP_TABLE_NAME + "." + Photo.URI +
+                    " FROM " + TABLE_NAME +
+                    " LEFT JOIN ( SELECT " +
+                    Sight.TABLE_NAME + "." + Sight._ID + " AS " + Sight.TEMP_SIGHT_ID + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.ICON + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.LONGITUDE + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.ORDER + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.TRAVEL_ID + COMMA_SEP +
+                    Photo.TABLE_NAME + "." + Photo._ID + " AS " + Sight.TEMP_PHOTO_ID + COMMA_SEP +
+                    Photo.TABLE_NAME + "." + Photo.URI +
+                    " FROM " + Sight.TABLE_NAME + " LEFT JOIN " + Photo.TABLE_NAME +
+                    " ON " + Sight.TABLE_NAME + "." + Sight._ID + " = " +
+                    Photo.TABLE_NAME + "." + Photo._ID +
+                    " ) AS " + Sight.TEMP_TABLE_NAME + " ON " +
+                    TABLE_NAME + "." + _ID + " = " + Sight.TEMP_TABLE_NAME + "." + Sight.TRAVEL_ID +
+                    " ORDER BY " + _ID + ", " + Sight.ORDER + ") " +
+                " WHERE " + _ID + " = (" + " SELECT " + Sight.TRAVEL_ID +
+                " FROM (" + Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + "))";
+
+        public static final String SELECT_THE_NEAREST_TRAVEL = " SELECT * " +
+                " FROM (" + SQL_GET_ALL_TRAVELS + ") LEFT JOIN (" +
+                Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + ") AS " + Sight.TEMP_TABLE_NAME +
+                " ON " + _ID + " = " + Sight.TRAVEL_ID;
+
+        /*public static final String SELECT_THE_NEAREST_TRAVEL = " SELECT * " +
+                " FROM (" + SQL_GET_ALL_TRAVELS_ALIAS + ") LEFT JOIN (" +
+                Sight.SQL_FIND_THE_NEAREST_TRAVEL_ID + ") AS " + Sight.TEMP_TABLE_NAME +
+                " ON " + TEMP_ID + " = " + Sight.TRAVEL_ID;*/
 
         private Travel (){}
     }
@@ -133,6 +179,25 @@ public final class TravelJournalContract {
                 "ABS(" + LONGITUDE + " - ?) < " + ACCURACY + ") OR (" +
                 "ABS(" + LATITUDE + "  - ?) < " + ACCURACY + " AND " +
                 "ABS(" + LONGITUDE + " - ?) < " + ACCURACY + ")";
+
+        public static final String SQL_FIND_THE_NEAREST_TRAVEL_ID_TEMP = " SELECT " +
+                TRAVEL_ID + COMMA_SEP +
+                " MIN( " +
+                    "(" + LATITUDE + " - ?" + ")*(" + LATITUDE + " - ?" + ") + " +
+                    "(" + LONGITUDE + " - ?" + ")*(" + LONGITUDE + " - ?)" +
+                ") AS " + TEMP_COLUMN +
+                " FROM " + TABLE_NAME +
+                " WHERE " + TRAVEL_ID + " IS NOT NULL ";
+
+        public static final String SQL_FIND_THE_NEAREST_TRAVEL_ID = " SELECT " +
+                TRAVEL_ID + COMMA_SEP +
+                _ID + COMMA_SEP +
+                " MIN( " +
+                    "(" + LATITUDE + " - ?" + ")*(" + LATITUDE + " - ?" + ") + " +
+                    "(" + LONGITUDE + " - ?" + ")*(" + LONGITUDE + " - ?)" +
+                ") AS " + TEMP_COLUMN +
+                " FROM " + TABLE_NAME +
+                " WHERE " + TRAVEL_ID + " IS NOT NULL ";
 
         private Sight (){}
     }
