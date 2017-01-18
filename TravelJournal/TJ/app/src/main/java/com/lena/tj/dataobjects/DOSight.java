@@ -24,11 +24,12 @@ public class DOSight {
         this.icon = icon;
     }
 
-    public DOSight(long id, String description, double latitude, double longitude, String icon,
+    public DOSight(long id, String description, double latitude, double longitude, String icon, Long travelId,
                    Long order, HashMap<Long, String> photos) {
         this(id, description, latitude, longitude, icon);
-
         this.order = order;
+        this.travelId = travelId;
+
         if (photos == null) {
             this.photos = new HashMap<>();
         } else {
@@ -98,5 +99,9 @@ public class DOSight {
 
     public void setPhotos(HashMap<Long, String> photos) {
         this.photos = photos;
+    }
+
+    public void addPhoto(Long id, String uri) {
+        this.photos.put(id, uri);
     }
 }

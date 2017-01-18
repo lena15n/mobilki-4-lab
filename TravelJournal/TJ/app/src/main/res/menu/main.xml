@@ -4,9 +4,9 @@
     <group android:id="@+id/group1_main"
            android:checkableBehavior="single">
         <item
-            android:id="@+id/action_about"
+            android:id="@+id/action_select_travels"
             android:orderInCategory="100"
-            android:title="@string/action_travels_list"
+            android:title="@string/action_select_travels"
             app:showAsAction="never"
             android:checkable="false"/>
     </group>
@@ -14,9 +14,9 @@
     <group  android:id="@+id/group2_main"
             android:checkableBehavior="single">
     <item
-        android:id="@+id/action_buy"
+        android:id="@+id/action_select_sights"
         android:orderInCategory="100"
-        android:title="@string/action_create_sight_by_address"
+        android:title="@string/action_select_sights"
         app:showAsAction="never"
         android:checkable="false"/>
     </group>
@@ -24,9 +24,9 @@
     <group  android:id="@+id/group3_main"
             android:checkableBehavior="single">
     <item
-        android:id="@+id/action_exit"
+        android:id="@+id/action_select_photos"
         android:orderInCategory="100"
-        android:title="@string/action_create_travel"
+        android:title="@string/action_select_photos"
         app:showAsAction="never"
         android:checkable="false"/>
     </group>

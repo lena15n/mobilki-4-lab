@@ -25,6 +25,37 @@ public final class TravelJournalContract {
                 NAME + TEXT_TYPE + " )";
         public static final String SQL_DELETE_TRAVEL = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
+        public static final String SQL_GET_ALL_TRAVELS = " SELECT " +
+                _ID + COMMA_SEP +
+                NAME + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_SIGHT_ID + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.ICON + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.LONGITUDE + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.ORDER + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Sight.TEMP_PHOTO_ID + " AS " + Sight.TEMP_PHOTO_ID + COMMA_SEP +
+                Sight.TEMP_TABLE_NAME + "." + Photo.URI +
+                " FROM " + TABLE_NAME +
+                " LEFT JOIN ( SELECT " +
+                    Sight.TABLE_NAME + "." + Sight._ID + " AS " + Sight.TEMP_SIGHT_ID + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.DESCRIPTION + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.ICON + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.LATITUDE + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.LONGITUDE + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.ORDER + COMMA_SEP +
+                    Sight.TABLE_NAME + "." + Sight.TRAVEL_ID + COMMA_SEP +
+                    Photo.TABLE_NAME + "." + Photo._ID + " AS " + Sight.TEMP_PHOTO_ID + COMMA_SEP +
+                    Photo.TABLE_NAME + "." + Photo.URI +
+                    " FROM " + Sight.TABLE_NAME + " LEFT JOIN " + Photo.TABLE_NAME +
+                    " ON " + Sight.TABLE_NAME + "." + Sight._ID + " = " +
+                    Photo.TABLE_NAME + "." + Photo._ID +
+                " ) AS " + Sight.TEMP_TABLE_NAME + " ON " +
+                TABLE_NAME + "." + _ID + " = " + Sight.TEMP_TABLE_NAME + "." + Sight.TRAVEL_ID +
+                " ORDER BY " + _ID + ", " + Sight.ORDER;
+
         private Travel (){}
     }
 
@@ -37,7 +68,7 @@ public final class TravelJournalContract {
         public static final String ORDER = "order_in_travel";
         public static final String TRAVEL_ID = "travel_id";
 
-        public static final String TEMP_TABLE_NAME = "temp_column";
+        public static final String TEMP_TABLE_NAME = "temp_table";
         public static final String TEMP_SIGHT_ID = "sight_id";
         public static final String TEMP_PHOTO_ID = "photo_id";
 
@@ -64,6 +95,23 @@ public final class TravelJournalContract {
                 " ON " + TABLE_NAME + "." + _ID + " = " + Photo.TABLE_NAME + "." + Photo.SIGHT_ID;
 
         public static final String SQL_DELETE_SIGHT = "DROP TABLE IF EXISTS " + TABLE_NAME;
+
+        public static final String SELECT_FIRST_SIGHT_OF_TRAVEL = " SELECT " +
+                TABLE_NAME + "." + _ID + ", MIN( " +
+                TABLE_NAME + "." + ORDER + ") " +
+                " FROM " + TABLE_NAME +
+                " WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ? ) ";
+
+        public static final String SELECT_LAST_SIGHT_OF_TRAVEL = " SELECT " +
+                TABLE_NAME + "." + _ID + ", MAX( " +
+                TABLE_NAME + "." + ORDER + ") " +
+                " FROM " + TABLE_NAME +
+                " WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ? ) ";
+
+        public static final String UPDATE_INCREMENT_ORDER = " UPDATE " + TABLE_NAME +
+                " SET " + TABLE_NAME + "." + ORDER + " = " +
+                TABLE_NAME + "." + ORDER + " + 1" +
+                "WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ?) ";
 
         private Sight (){}
     }

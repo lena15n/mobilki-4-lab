@@ -22,7 +22,9 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:id="@+id/maps_travel_creation_layout">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -30,7 +32,7 @@
             android:id="@+id/maps_from_layout">
 
             <Button
-                android:id="@+id/maps_chose_from_button"
+                android:id="@+id/maps_choose_from_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/travel_create_from_point"
@@ -38,14 +40,16 @@
 
             <TextView
                 android:id="@+id/maps_from_textview"
+                android:layout_below="@+id/maps_choose_from_button"
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="60dp"
+                android:layout_marginStart="5dp"
                 android:padding="10dp"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:background="@color/colorWhiteTransparent"
-                android:text="dfdgfhfgh1111"
+                android:text="@string/maps_from_address"
                 android:textColor="@color/colorPrimary"/>
         </RelativeLayout>
 
@@ -63,13 +67,15 @@
 
             <TextView
                 android:id="@+id/maps_to_textview"
+                android:layout_below="@+id/maps_choose_to_button"
                 android:layout_marginEnd="60dp"
                 android:padding="10dp"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:background="@color/colorWhiteTransparent"
-                android:text="dfdgfhfgh22222"
+                android:text="@string/maps_to_address"
+                android:layout_marginStart="5dp"
                 android:textColor="@color/colorPrimary"/>
         </RelativeLayout>
 

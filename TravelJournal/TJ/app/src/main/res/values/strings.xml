@@ -20,6 +20,12 @@
     <string name="action_add_sight">Create sight on the map</string>
     <string name="action_add_sight_current">Add my current location as sight</string>
 
+    <!--Remove later-->
+    <string name="action_select_sights">Select all sights from db</string>
+    <string name="action_select_travels">Select all travels from db</string>
+    <string name="action_select_photos">Select all photos from db</string>
+    <!--/Remove later-->
+
     <string name="sight">Sight</string>
     <string name="sight_description">Description:</string>
     <string name="sight_latitude">Latitude:</string>
@@ -74,8 +80,15 @@
     Original string: <b>%1$s</b><br/><i>Place Id: %2$s</i><br/>Address: %3$s<br/>Phone: %4$s<br/>Website: %5$s-->
     <string name="place_details">&lt;b&gt;%1$s&lt;/b&gt;&lt;br/&gt;&lt;i&gt;Place Id: %2$s&lt;/i&gt;&lt;br/&gt;Address: %3$s&lt;br/&gt;Phone: %4$s&lt;br/&gt;Website: %5$s</string>
 
-    <string name="travel_create_from_point">"Choose From" Mode</string>
-    <string name="travel_create_to_point">"Choose To" Mode</string>
+    <string name="travel_create_from_point">\"Choose From\" Mode</string>
+    <string name="travel_create_to_point">\"Choose To\" Mode</string>
     <string name="maps_travel_create_button">Create Travel</string>
     <string name="maps_clear_button">Clear</string>
+    <string name="maps_choose_from_marker">Choose \"From Point\" marker</string>
+    <string name="maps_choose_to_marker">Choose \"To Point\" marker</string>
+    <string name="maps_from_address">\"From\" address</string>
+    <string name="maps_to_address">\"To\" address</string>
+    <string name="maps_address_template">%1$s, %2$s, %3$s, %4$s</string>
+    <string name="travel_set_name">Enter name for the travel:</string>
+    <string name="travel_wrong_points">Wrong \"from\" or \"to\" point!</string>
 </resources>

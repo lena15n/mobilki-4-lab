@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -29,10 +30,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -54,13 +55,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.lena.tj.dataobjects.DOSight;
 import com.lena.tj.dataobjects.DOTravel;
 import com.lena.tj.db.DbOperations;
 import com.lena.tj.net.PostTask;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, PostTask.MyAsyncResponse {
@@ -77,8 +84,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng target;
     private int iconId;
     private String iconCode;
-    private LatLng currentLocation;
     private GoogleApiClient mGoogleApiClient;
+
+    private LatLng from;
+    private LatLng to;
+    private String travelName;
 
 
     @Override
@@ -192,7 +202,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 5000, null);
 
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(-18.142, 178.431), 2));
+                new LatLng(53.0, 50.0), 2));
 
         /*      OR
         // Polylines are useful for marking paths and routes on the map.
@@ -216,7 +226,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
             map.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
-                    .anchor(0.0f, 1.0f) // Anchors the marker on the bottom left
+                    .anchor(0.1f, 0.1f) // Anchors the marker on the bottom left
                     .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
                     .setTitle(sight.getDescription());
         }
@@ -224,7 +234,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void openTravels() {
         ArrayList<DOTravel> travels = DbOperations.getAllTravels(this);
-        //TODO
+        Double prevLat = null;
+        Double prevLon = null;
+
+        for (DOTravel travel : travels) {
+            for (DOSight sight : travel.getSights()) {
+                int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
+                map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
+                        .anchor(0.1f, 0.1f) // Anchors the marker on the bottom left
+                        .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
+                        .setTitle(sight.getDescription());
+                if (prevLat != null) {
+                    drawLine(new LatLng(prevLat, prevLon), new LatLng(sight.getLatitude(), sight.getLongitude()));
+                    prevLat = sight.getLatitude();
+                    prevLon = sight.getLongitude();
+                } else {
+                    prevLat = sight.getLatitude();
+                    prevLon = sight.getLongitude();
+                }
+            }
+        }
     }
 
     @Override
@@ -261,12 +291,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_select_travels:
+                DbOperations.printTravels(this);
+                break;
+            case R.id.action_select_sights:
+                DbOperations.printSights(this);
+                break;
+            case R.id.action_select_photos:
+                DbOperations.printPhotos(this);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.maps_travel_creation_layout);
+        relativeLayout.setVisibility(View.INVISIBLE);
 
         if (id == R.id.create_travel) {
             createTravel();
@@ -281,7 +328,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             guessCurrentPlace();
         }
         else if (id == R.id.travels_list) {
-
+            startActivity(new Intent(this, TravelsListActivity.class));
         }
         else if (id == R.id.sights_list) {
             startActivity(new Intent(this, SightsListActivity.class));
@@ -299,34 +346,139 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void createTravel() {
-        Button fromButton = new Button(this);
-        fromButton.setText(getString(R.string.travel_create_from_point));
+        final Button fromButton = (Button) findViewById(R.id.maps_choose_from_button);
+        final Button toButton = (Button) findViewById(R.id.maps_choose_to_button);
+        final Button createTravelButton = (Button) findViewById(R.id.maps_create_travel_button);
+        final Button clearTravelButton = (Button) findViewById(R.id.maps_clear_button);
+
         fromButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MapsActivity.this, "fromm", Toast.LENGTH_SHORT).show();
+                fromButton.setEnabled(false);
+                toButton.setEnabled(false);
+                createTravelButton.setEnabled(false);
+                clearTravelButton.setEnabled(false);
+
+                map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        from = marker.getPosition();
+
+                        Geocoder geocoder;
+                        List<android.location.Address> addresses = null;
+                        geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
+
+                        try {
+                            addresses = geocoder.getFromLocation(from.latitude, from.longitude, 1);
+                            // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        String address = addresses.get(0).getAddressLine(0);
+                        String city = addresses.get(0).getLocality();
+                        String state = addresses.get(0).getAdminArea();
+                        String country = addresses.get(0).getCountryName();
+                        TextView fromTextView = (TextView) findViewById(R.id.maps_from_textview);
+                        fromTextView.setText(String.format(getString(R.string.maps_address_template),
+                                country, state, city, address));
+                        fromButton.setEnabled(true);
+                        toButton.setEnabled(true);
+                        createTravelButton.setEnabled(true);
+                        clearTravelButton.setEnabled(true);
+                        return false;
+                    }
+                });
+
+                Toast.makeText(MapsActivity.this, getString(R.string.maps_choose_from_marker),
+                        Toast.LENGTH_LONG).show();
             }
         });
 
-        Button toButton = new Button(this);
-        toButton.setText(getString(R.string.travel_create_to_point));
         toButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MapsActivity.this, "too", Toast.LENGTH_SHORT).show();
+                fromButton.setEnabled(false);
+                toButton.setEnabled(false);
+                createTravelButton.setEnabled(false);
+                clearTravelButton.setEnabled(false);
+
+                map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        to = marker.getPosition();
+
+                        Geocoder geocoder;
+                        List<android.location.Address> addresses = null;
+                        geocoder = new Geocoder(MapsActivity.this, Locale.getDefault());
+
+                        try {
+                            addresses = geocoder.getFromLocation(to.latitude, to.longitude, 1);
+                            // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        String address = addresses.get(0).getAddressLine(0);
+                        String city = addresses.get(0).getLocality();
+                        String state = addresses.get(0).getAdminArea();
+                        String country = addresses.get(0).getCountryName();
+                        TextView toTextView = (TextView) findViewById(R.id.maps_to_textview);
+                        toTextView.setText(String.format(getString(R.string.maps_address_template),
+                                country, state, city, address));
+                        fromButton.setEnabled(true);
+                        toButton.setEnabled(true);
+                        createTravelButton.setEnabled(true);
+                        clearTravelButton.setEnabled(true);
+                        return false;
+                    }
+                });
+
+                Toast.makeText(MapsActivity.this, getString(R.string.maps_choose_to_marker),
+                        Toast.LENGTH_LONG).show();
             }
         });
 
-        LinearLayout ll = (LinearLayout)findViewById(R.id.maps_linear_layout);
-        DrawerLayout.LayoutParams lp = new DrawerLayout.LayoutParams(300, DrawerLayout.LayoutParams.WRAP_CONTENT);
-        ll.addView(fromButton, lp);
-        ll.addView(toButton, lp);
+        createTravelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (from != null && to != null && !from.equals(to)) {
+                    askTravelNameAndInsert();
+                }
+                else {
+                    Toast.makeText(MapsActivity.this, getString(R.string.travel_wrong_points), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
-        SupportMapFragment mMapFragment = (SupportMapFragment) (getSupportFragmentManager()
-                .findFragmentById(R.id.map));
-        ViewGroup.LayoutParams params = mMapFragment.getView().getLayoutParams();
-        params.height = 800;
-        mMapFragment.getView().setLayoutParams(params);
+        clearTravelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView fromTV = (TextView) findViewById(R.id.maps_from_textview);
+                fromTV.setText("");
+                from = null;
+                TextView toTV = (TextView) findViewById(R.id.maps_to_textview);
+                toTV.setText("");
+                to = null;
+            }
+        });
+
+        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.maps_travel_creation_layout);
+        relativeLayout.setVisibility(View.VISIBLE);
+
+
+    }
+
+    private void drawLine(LatLng from, LatLng to) {
+        PolylineOptions polylineOptions = new PolylineOptions();
+        polylineOptions.add(from, to);
+        Random rnd = new Random();
+        int lineColor = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        polylineOptions.color(lineColor);
+        map.addPolyline(polylineOptions);
+
+        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.maps_travel_creation_layout);
+        relativeLayout.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -346,7 +498,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             iconCode = data.getStringExtra(IconChooserActivity.RESULT_ICON_ID);
             iconId = this.getResources().getIdentifier(iconCode, "drawable", this.getPackageName());
             target = data.getExtras().getParcelable(getString(R.string.sight_point));
-            insertSightInfoIntoDB();
+            askSightNameAndInsert();
         }
         else if (requestCode == REQUEST_NEW_SIGHT_BY_ADDRESS && resultCode == Activity.RESULT_OK) {
             LatLng placeLatLng = data.getParcelableExtra(getString(R.string.sight_point));
@@ -408,7 +560,51 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
-    private void insertSightInfoIntoDB() {
+    private void askTravelNameAndInsert(){
+        if (!DbOperations.isTravelNameExists(this, from, to)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getString(R.string.travel_set_name));
+            final EditText input = new EditText(this);
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            builder.setView(input);
+
+            builder.setPositiveButton(getString(R.string.dialog_ok), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    travelName = input.getText().toString();
+                    if (!DbOperations.createTravel(MapsActivity.this, from, to, travelName))
+                        Toast.makeText(MapsActivity.this, "Can t create travel..", Toast.LENGTH_LONG).show();
+                    else {
+                        //draw line on map
+                        drawLine(from, to);
+                    }
+                }
+            });
+            builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                        @Override
+                        public void onMapClick(LatLng latLng) {
+                            //nothing, unregister
+                        }
+                    });
+                    dialog.cancel();
+                }
+            });
+
+            builder.show();
+        } else {
+            if (DbOperations.createTravel(MapsActivity.this, from, to, null)){
+                drawLine(from, to);
+            }
+            else {
+                Toast.makeText(MapsActivity.this, "Can t modify travel..", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void askSightNameAndInsert() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.sight_set_description));
         final EditText input = new EditText(this);

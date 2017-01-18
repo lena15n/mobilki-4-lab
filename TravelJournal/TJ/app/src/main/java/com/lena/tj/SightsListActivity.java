@@ -84,6 +84,11 @@ public class SightsListActivity extends AppCompatActivity {
         });
     }
 
+   /* private ArrayList<DOTravel> prepareTravelsToShow() {
+
+
+    }*/
+
     private ArrayList<DOSight> prepareSightsToShow() {
         TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -138,7 +143,7 @@ public class SightsListActivity extends AppCompatActivity {
                             photos.put(photoId, photoUri);
                         }
 
-                        DOSight sight = new DOSight(id, desc, latitude, longitude, icon, order, photos);
+                        DOSight sight = new DOSight(id, desc, latitude, longitude, icon, order, (long)-1, photos);
                         sights.add(sight);
                         prevId = id;
                     }
