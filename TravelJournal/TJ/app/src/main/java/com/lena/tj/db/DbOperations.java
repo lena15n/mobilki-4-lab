@@ -193,7 +193,6 @@ public class DbOperations {
      */
     public static int createTravel(Context context, LatLng from, LatLng to, String name) {
         TravelJournalDbHelper mDbHelper = new TravelJournalDbHelper(context);
-        long newTravelId = -1;
         DOSight fromSight = null;
         DOSight toSight = null;
         boolean result = false;
@@ -257,7 +256,7 @@ public class DbOperations {
                 ContentValues values = new ContentValues();
                 values.put(TravelJournalContract.Travel.NAME, name);
                 values.put(TravelJournalContract.Travel.COLOR, color);
-                newTravelId = db.insert(TravelJournalContract.Travel.TABLE_NAME, null, values);
+                long newTravelId = db.insert(TravelJournalContract.Travel.TABLE_NAME, null, values);
 
                 values = new ContentValues();
                 values.put(TravelJournalContract.Sight.TRAVEL_ID, newTravelId);
@@ -272,12 +271,12 @@ public class DbOperations {
                 db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
                         String.valueOf(toSight.getId())});
                 result = true;
-            } else if (!fromSight.getTravelId().equals(toSight.getTravelId())) {
+            } else
                 if (fromSight.getTravelId() == null && toSight.getTravelId() != null) {
                     // Modify old travel
 
                     Cursor orderCur = db.rawQuery(SELECT_FIRST_SIGHT_OF_TRAVEL,
-                            new String[]{String.valueOf(fromSight.getTravelId())});
+                            new String[]{String.valueOf(toSight.getTravelId())});
                     long firstSightId = -1;
 
                     if (orderCur != null) {
@@ -288,7 +287,7 @@ public class DbOperations {
                     }
 
                     Cursor colorCur = db.rawQuery(TravelJournalContract.Travel.SELECT_COLOR_OF_TRAVEL,
-                            new String[]{String.valueOf(fromSight.getTravelId())});
+                            new String[]{String.valueOf(toSight.getTravelId())});
                     if (colorCur != null) {
                         if (colorCur.moveToFirst()) {
                             color = colorCur.getInt(colorCur.getColumnIndex(TravelJournalContract.Travel.COLOR));
@@ -296,17 +295,18 @@ public class DbOperations {
                         colorCur.close();
                     }
 
-                    if (firstSightId == fromSight.getId()) {// if sight id == 1
+                    if (firstSightId == toSight.getId()) {// if sight id == 1
                         db = mDbHelper.getWritableDatabase();
+                        long travelId = toSight.getTravelId();
                         db.execSQL(UPDATE_INCREMENT_ORDER, new String[]{
-                                String.valueOf(fromSight.getTravelId())});
+                                String.valueOf(travelId)});
 
                         ContentValues values = new ContentValues();
-                        values.put(TravelJournalContract.Sight.TRAVEL_ID, newTravelId);
+                        values.put(TravelJournalContract.Sight.TRAVEL_ID, travelId);
                         values.put(TravelJournalContract.Sight.ORDER, 1);
                         String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
                         int res = db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
-                                String.valueOf(toSight.getId())});
+                                String.valueOf(fromSight.getId())});
                         result = true;
                     }
                 } else if (fromSight.getTravelId() != null && toSight.getTravelId() == null) {
@@ -349,7 +349,6 @@ public class DbOperations {
                     }
                 }
             }
-        }
 
         db.close();
 

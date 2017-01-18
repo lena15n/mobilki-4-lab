@@ -119,9 +119,9 @@ public final class TravelJournalContract {
                 " WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ? ) ";
 
         public static final String UPDATE_INCREMENT_ORDER = " UPDATE " + TABLE_NAME +
-                " SET " + TABLE_NAME + "." + ORDER + " = " +
-                TABLE_NAME + "." + ORDER + " + 1" +
-                "WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ?) ";
+                " SET " + ORDER + " = " +
+                ORDER + " + 1" +
+                " WHERE ( " + TRAVEL_ID + " = ?) ";
 
         public static final String SELECT_SMTH = " SELECT * FROM " +
                 TABLE_NAME +
