@@ -15,6 +15,13 @@
             android:title="@string/action_add_sight"/>
     </group>
 
+    <group  android:id="@+id/group2_1"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/add_sight_easy"
+            android:title="@string/action_add_sight_easy"/>
+    </group>
+
     <group  android:id="@+id/group3"
             android:checkableBehavior="single">
         <item

@@ -30,4 +30,14 @@
         app:showAsAction="never"
         android:checkable="false"/>
     </group>
+
+    <group  android:id="@+id/group4_main"
+            android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_select_travels_join"
+            android:orderInCategory="100"
+            android:title="@string/action_select_travels_join"
+            app:showAsAction="never"
+            android:checkable="false"/>
+    </group>
 </menu>

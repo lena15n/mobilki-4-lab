@@ -58,6 +58,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
 import com.lena.tj.dataobjects.DOSight;
 import com.lena.tj.dataobjects.DOTravel;
 import com.lena.tj.db.DbOperations;
@@ -129,6 +130,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+
+        String jsonTravel = getIntent().getStringExtra(getString(R.string.travel_data));
+        if (jsonTravel != null) {
+            map.clear();
+            drawTravel(new Gson().fromJson(jsonTravel, DOTravel.class));
+        }
     }
 
     @Override
@@ -235,26 +242,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void openTravels() {
+        //TODO: In Service or Loader
         ArrayList<DOTravel> travels = DbOperations.getAllTravels(this);
+
+        for (DOTravel travel : travels) {
+            drawTravel(travel);
+        }
+    }
+
+    private void drawTravel(DOTravel travel) {
         Double prevLat = null;
         Double prevLon = null;
 
-        for (DOTravel travel : travels) {
-            for (DOSight sight : travel.getSights()) {
-                int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
-                map.addMarker(new MarkerOptions()
-                        .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
-                        .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
-                        .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
-                        .setTitle(sight.getDescription());
-                if (prevLat != null) {
-                    drawLine(new LatLng(prevLat, prevLon), new LatLng(sight.getLatitude(), sight.getLongitude()));
-                    prevLat = sight.getLatitude();
-                    prevLon = sight.getLongitude();
-                } else {
-                    prevLat = sight.getLatitude();
-                    prevLon = sight.getLongitude();
-                }
+        for (DOSight sight : travel.getSights()) {
+            int icon = this.getResources().getIdentifier(sight.getIcon(), "drawable", this.getPackageName());
+            map.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(MapsActivity.this, icon)))
+                    .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
+                    .position(new LatLng(sight.getLatitude(), sight.getLongitude())))
+                    .setTitle(sight.getDescription());
+            if (prevLat != null) {
+                drawLine(new LatLng(prevLat, prevLon), new LatLng(sight.getLatitude(), sight.getLongitude()));
+                prevLat = sight.getLatitude();
+                prevLon = sight.getLongitude();
+            } else {
+                prevLat = sight.getLatitude();
+                prevLon = sight.getLongitude();
             }
         }
     }
@@ -305,6 +318,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_select_photos:
                 DbOperations.printPhotos(this);
                 break;
+            case R.id.action_select_travels_join:
+                DbOperations.getAllTravels(this);
+
+                //DbOperations.doSmth(this);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -326,6 +343,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         else if (id == R.id.add_sight) {
             displayPlacePickerAndAddSight();
         }
+        else if (id == R.id.add_sight_easy) {
+            addSightSimply();
+        }
         else if (id == R.id.add_sight_current) {
             guessCurrentPlace();
         }
@@ -345,6 +365,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    private void addSightSimply() {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                Intent intent = new Intent(getApplicationContext(), IconChooserActivity.class);
+                intent.putExtra(getString(R.string.sight_point), latLng);
+                startActivityForResult(intent, REQUEST_NEW_ICON);
+                map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        // do nothing
+                    }
+                });
+            }
+        });
     }
 
     private void createTravel() {

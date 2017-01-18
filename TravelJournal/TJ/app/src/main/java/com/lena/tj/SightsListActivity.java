@@ -35,7 +35,7 @@ public class SightsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sights_list);
 
-        String json = getIntent().getStringExtra(getString(R.string.travel_sights_ids));
+        String json = getIntent().getStringExtra(getString(R.string.travel_data));
         if (json != null) {
             Type type = new TypeToken<ArrayList<String>>() {
             }.getType();

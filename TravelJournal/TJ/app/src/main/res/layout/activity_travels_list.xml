@@ -11,4 +11,20 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.lena.tj.TravelsListActivity">
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="@string/travels_header"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="20dp"
+        style="@style/FontHeader"
+        android:id="@+id/travels_header"/>
+
+    <ListView
+        android:id="@+id/all_travels_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/travels_header"/>
+
 </RelativeLayout>

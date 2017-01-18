@@ -12,10 +12,13 @@ import com.lena.tj.dataobjects.DOSight;
 import com.lena.tj.dataobjects.DOTravel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.lena.tj.db.TravelJournalContract.Sight.SELECT_FIRST_SIGHT_OF_TRAVEL;
 import static com.lena.tj.db.TravelJournalContract.Sight.SELECT_LAST_SIGHT_OF_TRAVEL;
 import static com.lena.tj.db.TravelJournalContract.Sight.UPDATE_INCREMENT_ORDER;
+import static com.lena.tj.db.TravelJournalContract.Sight.WHERE_LAT_LONG;
 
 public class DbOperations {
     public static void insertNewSight(Context context, String desc, String iconCode, double latitude, double longitude) {
@@ -75,6 +78,57 @@ public class DbOperations {
         }
 
         cursor.close();
+        db.close();
+    }
+
+    public static void deleteTravel(Context context, DOTravel travel) {
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        for (DOSight sight : travel.getSights()) {
+            if (sight.getPhotosSize() > 0) {
+                HashMap<Long, String> photos = sight.getPhotos();
+                for (Map.Entry<Long, String> photo : photos.entrySet()) {
+                    int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
+                            TravelJournalContract.Photo._ID + " = " + photo.getKey(), null);
+                }
+
+                int delCount = db.delete(TravelJournalContract.Sight.TABLE_NAME,
+                        TravelJournalContract.Photo._ID + " = " + sight.getId(), null);
+            }
+        }
+
+        int delCount = db.delete(TravelJournalContract.Travel.TABLE_NAME,
+                TravelJournalContract.Sight._ID + " = " + travel.getId(), null);
+
+        db.close();
+    }
+
+    public static void deleteSight(Context context, DOSight sight) {
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        if (sight.getPhotosSize() > 0) {
+            HashMap<Long, String> photos = sight.getPhotos();
+            for (Map.Entry<Long, String> photo : photos.entrySet()) {
+                int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
+                        TravelJournalContract.Photo._ID + " = " + photo.getKey(), null);
+            }
+        }
+
+        int delCount = db.delete(TravelJournalContract.Sight.TABLE_NAME,
+                TravelJournalContract.Photo._ID + " = " + sight.getId(), null);
+
+        db.close();
+    }
+
+    public static void deletePhoto(Context context, Long photoId) {
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
+                        TravelJournalContract.Photo._ID + " = " + photoId, null);
+
         db.close();
     }
 
@@ -151,10 +205,7 @@ public class DbOperations {
                 TravelJournalContract.Sight.ORDER
         };
 
-        String where = " (" + TravelJournalContract.Sight.LATITUDE + " = ? AND " +
-                TravelJournalContract.Sight.LONGITUDE + " = ?) OR " +
-                "(" + TravelJournalContract.Sight.LATITUDE + " = ? AND " +
-                TravelJournalContract.Sight.LONGITUDE + " = ?)";
+        String where = WHERE_LAT_LONG;
 
         Cursor cursor = db.query(TravelJournalContract.Sight.TABLE_NAME, projection, where,
                 new String[]{
@@ -187,6 +238,8 @@ public class DbOperations {
                 }
                 while (cursor.moveToNext());
             }
+
+            cursor.close();
         }
 
         if (fromSight != null && toSight != null) {
@@ -235,7 +288,7 @@ public class DbOperations {
                         values.put(TravelJournalContract.Sight.TRAVEL_ID, newTravelId);
                         values.put(TravelJournalContract.Sight.ORDER, 1);
                         String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
-                        db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
+                        int res = db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
                                 String.valueOf(toSight.getId())});
                         result = true;
                     }
@@ -250,7 +303,7 @@ public class DbOperations {
                     if (orderCur != null) {
                         if (orderCur.moveToFirst()) {
                             lastSightId = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight._ID));
-                            lastSightOrder = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight.ORDER));
+                            lastSightOrder = orderCur.getLong(orderCur.getColumnIndex(TravelJournalContract.Sight.TEMP_COLUMN));
                         }
                     }
 
@@ -258,7 +311,7 @@ public class DbOperations {
                         db = mDbHelper.getWritableDatabase();
 
                         ContentValues values = new ContentValues();
-                        values.put(TravelJournalContract.Sight.TRAVEL_ID, newTravelId);
+                        values.put(TravelJournalContract.Sight.TRAVEL_ID, fromSight.getTravelId());
                         values.put(TravelJournalContract.Sight.ORDER, lastSightOrder + 1);
                         String whereClause = " (" + TravelJournalContract.Sight._ID + " = ? ) ";
                         db.update(TravelJournalContract.Sight.TABLE_NAME, values, whereClause, new String[]{
@@ -281,10 +334,7 @@ public class DbOperations {
         TravelJournalDbHelper mDbHelper = new TravelJournalDbHelper(context);
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] projection = new String[]{TravelJournalContract.Sight.TRAVEL_ID};
-        String where = " (" + TravelJournalContract.Sight.LATITUDE + " = ? AND " +
-                TravelJournalContract.Sight.LONGITUDE + " = ?) OR " +
-                "(" + TravelJournalContract.Sight.LATITUDE + " = ? AND " +
-                TravelJournalContract.Sight.LONGITUDE + " = ?)";
+        String where = WHERE_LAT_LONG;
         Cursor cursor = db.query(TravelJournalContract.Sight.TABLE_NAME, projection, where,
                 new String[]{
                         String.valueOf(from.latitude),
@@ -367,17 +417,15 @@ public class DbOperations {
 
                         prevSightId = sightId;
                         prevTravelId = id;
-                        //добавляем фото в список фоток
-                        //если фото закончились - добавляем список фоток в сайт
-                        // и добавляем сайт в список сайтов
-                        //если сайты закончились - добавляем сайты в тревел
-                        //если тревелы закончились - добавляем тревел в тревелы
                     }
                 }
                 while (cursor.moveToNext());
             }
-
             cursor.close();
+
+            if (travel != null) {
+                travels.add(travel);
+            }
         }
 
         db.close();
@@ -479,5 +527,21 @@ public class DbOperations {
 
         db.close();
         Log.d(MapsActivity.LOG_TAG, "--------------- e n d --------------");
+    }
+
+    public static void doSmth(Context context) {
+        TravelJournalDbHelper mDbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        int count = 0;
+        Cursor cursor = db.rawQuery(TravelJournalContract.Sight.SELECT_SMTH, new String[] {});
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+
+                count++;
+                Log.d(MapsActivity.LOG_TAG, "нашел" + count);
+            }
+        }
+
+        db.close();
     }
 }

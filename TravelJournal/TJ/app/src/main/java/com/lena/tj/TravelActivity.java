@@ -1,10 +1,7 @@
 package com.lena.tj;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,9 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.lena.tj.dataobjects.DOSight;
 import com.lena.tj.dataobjects.DOTravel;
-import com.lena.tj.db.TravelJournalContract;
-import com.lena.tj.db.TravelJournalDbHelper;
+import com.lena.tj.db.DbOperations;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -32,7 +29,6 @@ import java.util.Map;
 public class TravelActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSION = 2;
     private DOTravel travel;
-    ArrayList<Long> photosIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +61,7 @@ public class TravelActivity extends AppCompatActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteTravel(travel);
+                deleteTravel();
             }
         });
     }
@@ -73,14 +69,14 @@ public class TravelActivity extends AppCompatActivity {
     private void showSights() {
         Gson gson = new Gson();
         Intent intent = new Intent(this, SightsListActivity.class);
-        intent.putExtra(getString(R.string.travel_sights_ids), gson.toJson(loadSightsIds(this)));
+        intent.putExtra(getString(R.string.travel_data), gson.toJson(getSights()));
         startActivity(intent);
     }
 
     private void showOnTheMap() {
         Gson gson = new Gson();
         Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra(getString(R.string.travel_sights_ids), gson.toJson(loadSightsIds(this)));
+        intent.putExtra(getString(R.string.travel_data), gson.toJson(travel));
         startActivity(intent);
     }
 
@@ -103,45 +99,16 @@ public class TravelActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(
                     this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
         } else {
-            showImages(loadPhotos(this));
+            showImages(getPhotos());
         }
     }
 
-    private HashMap<Long, String> loadPhotos(Context context) {
+    private HashMap<Long, String> getPhotos() {
         HashMap<Long, String> photos = new HashMap<>();
 
-        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
-                TravelJournalContract.Photo._ID,
-                TravelJournalContract.Photo.URI
-        };
-
-        Cursor cursor = db.query(
-                TravelJournalContract.Sight.TABLE_NAME,  // The table to query
-                projection,                               // The columns to return
-                null,                                     // The columns for the WHERE clause
-                null,                                     // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                null                                      // The sort order
-        );
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Photo._ID));
-                    String uri = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Photo._ID));
-                    photos.put(id, uri);
-                }
-                while (cursor.moveToNext());
-            }
+        for (DOSight sight : travel.getSights()) {
+            photos.putAll(sight.getPhotos());
         }
-
-        cursor.close();
-        db.close();
-
-        photosIds.addAll(photos.keySet());
 
         return photos;
     }
@@ -181,7 +148,7 @@ public class TravelActivity extends AppCompatActivity {
             case REQUEST_PERMISSION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
-                    showImages(loadPhotos(this));
+                    showImages(getPhotos());
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -191,63 +158,18 @@ public class TravelActivity extends AppCompatActivity {
         }
     }
 
-    private ArrayList<Long> loadSightsIds(Context context) {
-        ArrayList<Long> sightsIds = new ArrayList<>();
+    private ArrayList<DOSight> getSights() {
+        ArrayList<DOSight> sights = new ArrayList<>();
 
-        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
-                TravelJournalContract.Sight._ID,
-        };
-
-        Cursor cursor = db.query(
-                TravelJournalContract.Sight.TABLE_NAME,  // The table to query
-                projection,                               // The columns to return
-                null,                                     // The columns for the WHERE clause
-                null,                                     // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                null                                      // The sort order
-        );
-
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                do {
-                    long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
-                    sightsIds.add(id);
-                }
-                while (cursor.moveToNext());
-            }
+        for (DOSight sight : travel.getSights()) {
+            sights.add(sight);
         }
 
-        cursor.close();
-        db.close();
-
-        return sightsIds;
+        return sights;
     }
 
-    private void deleteTravel(DOTravel mTravel) {
-        ArrayList<Long> sightsIds = loadSightsIds(this);
-
-        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(this);
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        for (Long photoId : photosIds) {
-            int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
-                    TravelJournalContract.Photo._ID + " = " + photoId, null);
-        }
-
-        for (Long sightId : sightsIds) {
-            int delCount = db.delete(TravelJournalContract.Sight.TABLE_NAME,
-                    TravelJournalContract.Photo._ID + " = " + sightId, null);
-        }
-
-        int delCount = db.delete(TravelJournalContract.Travel.TABLE_NAME,
-                TravelJournalContract.Sight._ID + " = " + mTravel.getId(), null);
-
-        db.close();
-
-        Intent intent = new Intent(this, TravelsListActivity.class);
-        startActivity(intent);
+    private void deleteTravel() {
+        DbOperations.deleteTravel(this, travel);
+        startActivity(new Intent(this, TravelsListActivity.class));
     }
 }

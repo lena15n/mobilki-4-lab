@@ -37,6 +37,10 @@ public class DOSight {
         }
     }
 
+    public int getPhotosSize() {
+        return photos.size();
+    }
+
     public long getId() {
         return id;
     }

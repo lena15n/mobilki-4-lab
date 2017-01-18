@@ -71,6 +71,9 @@ public final class TravelJournalContract {
         public static final String TEMP_TABLE_NAME = "temp_table";
         public static final String TEMP_SIGHT_ID = "sight_id";
         public static final String TEMP_PHOTO_ID = "photo_id";
+        public static final String TEMP_COLUMN = "temp";
+
+        private static final double ACCURACY = 0.0000000000001;//10^-6 max
 
         public static final String SQL_CREATE_SIGHT = "CREATE TABLE " + TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY," +
@@ -98,13 +101,13 @@ public final class TravelJournalContract {
 
         public static final String SELECT_FIRST_SIGHT_OF_TRAVEL = " SELECT " +
                 TABLE_NAME + "." + _ID + ", MIN( " +
-                TABLE_NAME + "." + ORDER + ") " +
+                TABLE_NAME + "." + ORDER + ") AS " + Sight.TEMP_COLUMN +
                 " FROM " + TABLE_NAME +
                 " WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ? ) ";
 
         public static final String SELECT_LAST_SIGHT_OF_TRAVEL = " SELECT " +
                 TABLE_NAME + "." + _ID + ", MAX( " +
-                TABLE_NAME + "." + ORDER + ") " +
+                TABLE_NAME + "." + ORDER + ") AS " + Sight.TEMP_COLUMN +
                 " FROM " + TABLE_NAME +
                 " WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ? ) ";
 
@@ -112,6 +115,17 @@ public final class TravelJournalContract {
                 " SET " + TABLE_NAME + "." + ORDER + " = " +
                 TABLE_NAME + "." + ORDER + " + 1" +
                 "WHERE ( " + TABLE_NAME + "." + TRAVEL_ID + " = ?) ";
+
+        public static final String SELECT_SMTH = " SELECT * FROM " +
+                TABLE_NAME +
+                " WHERE ABS(" + //LATITUDE + " = 22.59371151533926 OR " +
+                LONGITUDE + " - ?) < 0.000000000000001 ";//10^-6 max
+
+        public static final String WHERE_LAT_LONG = " ( " +
+                "ABS(" + LATITUDE + "  - ?) < " + ACCURACY + " AND " +
+                "ABS(" + LONGITUDE + " - ?) < " + ACCURACY + ") OR (" +
+                "ABS(" + LATITUDE + "  - ?) < " + ACCURACY + " AND " +
+                "ABS(" + LONGITUDE + " - ?) < " + ACCURACY + ")";
 
         private Sight (){}
     }
