@@ -104,16 +104,6 @@
                 android:text="@string/travel_button_show_sights"/>
 
             <Button
-                android:id="@+id/travel_button_show_on_the_map"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/layoutt5"
-                android:layout_alignParentStart="true"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="32dp"
-                android:text="@string/button_show_on_the_map"/>
-
-            <Button
                 android:id="@+id/travel_button_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -122,6 +112,16 @@
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="32dp"
                 android:text="@string/button_delete"/>
+
+            <Button
+                android:id="@+id/travel_button_show_on_the_map"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/layoutt5"
+                android:text="@string/button_show_on_the_map"
+                android:layout_toEndOf="@+id/travel_button_show_sights"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"/>
 
         </RelativeLayout>
     </ScrollView>

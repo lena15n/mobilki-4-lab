@@ -130,12 +130,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
-        String jsonTravel = getIntent().getStringExtra(getString(R.string.travel_data));
-        if (jsonTravel != null) {
-            map.clear();
-            drawTravel(new Gson().fromJson(jsonTravel, DOTravel.class));
-        }
     }
 
     @Override
@@ -187,25 +181,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         map.setMyLocationEnabled(true);
-
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-
-        map.addMarker(new MarkerOptions().title("Marker in Sydney").position(sydney).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_audiotrack)));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));//.newLatLng(sydney));
-        map.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_tv_dark))
-                .anchor(ANCHOR_X, ANCHOR_Y) // Anchors the marker on the bottom left
-                .position(new LatLng(41.889, -87.622)));
-        //.flat(true)
-        //.rotation(245));
-
         CameraPosition cameraPosition = CameraPosition.builder()
                 .target(new LatLng(41.889, -87.622))
                 .zoom(13)
                 .bearing(90)
                 .build();
-
         // Animate the change in camera view over 2 seconds
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),
                 5000, null);
@@ -213,19 +193,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(53.0, 50.0), 2));
 
-        /*      OR
-        // Polylines are useful for marking paths and routes on the map.
-
-        map.addPolyline(new PolylineOptions().geodesic(true)
-                .add(new LatLng(-33.866, 151.195))  // Sydney
-                .add(new LatLng(-18.142, 178.431))  // Fiji
-                .add(new LatLng(21.291, -157.821))  // Hawaii
-                .add(new LatLng(37.423, -122.091))  // Mountain View
-        ); */
-
-
-        openSights();
-        openTravels();
+        String jsonTravel = getIntent().getStringExtra(getString(R.string.travel_data));
+        if (jsonTravel != null) {
+            map.clear();
+            drawTravel(new Gson().fromJson(jsonTravel, DOTravel.class));
+        } else {
+            openSights();
+            openTravels();
+        }
     }
 
     private void openSights() {

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SightsListActivity extends AppCompatActivity {
-    private ArrayList<String> sightsIds;
+    private ArrayList<String> sights;
     private String mode;
     private ArrayAdapter<DOSight> arrayAdapter;
 
@@ -37,9 +37,8 @@ public class SightsListActivity extends AppCompatActivity {
 
         String json = getIntent().getStringExtra(getString(R.string.travel_data));
         if (json != null) {
-            Type type = new TypeToken<ArrayList<String>>() {
-            }.getType();
-            sightsIds = new Gson().fromJson(json, type);
+            Type type = new TypeToken<ArrayList<DOSight>>() {}.getType();
+            sights = new Gson().fromJson(json, type);
             mode = getString(R.string.travel);
             TextView headerTextView = (TextView) findViewById(R.id.sights_header);
             headerTextView.setText(getIntent().getStringExtra(getString(R.string.travel_name)));
@@ -94,13 +93,13 @@ public class SightsListActivity extends AppCompatActivity {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = TravelJournalContract.Sight.SQL_LEFT_JOIN_PHOTO;
 
-        if (mode.equals(R.string.travel) && sightsIds.size() > 0) {
+        if (mode.equals(R.string.travel) && sights.size() > 0) {
             StringBuilder where = new StringBuilder();
             where.append(" WHERE ");
             int i = 0;
-            for (String sightId : sightsIds) {
+            for (String sightId : sights) {
                 where.append(TravelJournalContract.Sight.TEMP_SIGHT_ID + " = " + sightId + " ");
-                if (i < sightsIds.size() - 1){
+                if (i < sights.size() - 1){
                     where.append(" OR ");
                 }
                 i++;

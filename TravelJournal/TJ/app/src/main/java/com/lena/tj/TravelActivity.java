@@ -57,7 +57,7 @@ public class TravelActivity extends AppCompatActivity {
             }
         });
 
-        Button deleteButton = (Button) findViewById(R.id.sight_button_delete);
+        Button deleteButton = (Button) findViewById(R.id.travel_button_delete);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -170,6 +170,6 @@ public class TravelActivity extends AppCompatActivity {
 
     private void deleteTravel() {
         DbOperations.deleteTravel(this, travel);
-        startActivity(new Intent(this, TravelsListActivity.class));
+        startActivity(new Intent(this, MapsActivity.class));
     }
 }
