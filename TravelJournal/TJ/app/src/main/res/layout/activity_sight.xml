@@ -200,44 +200,52 @@
                     android:layout_alignParentEnd="true">
                 </LinearLayout>
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/show_imageviews_layout"
+                    android:id="@+id/sight_image_button_layout">
+                    <Button
+                    android:id="@+id/sight_button_attach"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/sight_button_clear"
+                    android:text="@string/button_attach"/>
 
+                    <Button
+                        android:id="@+id/sight_button_clear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="@string/button_clear"/>
+                </RelativeLayout>
             </RelativeLayout>
-
-            <!--<Button
-                android:id="@+id/edit_record_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/layouts5"
-                android:layout_alignParentStart="true"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="32dp"
-                android:text="@string/edit_record_button"/>-->
-
-            <Button
-                android:id="@+id/sight_button_attach"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/layouts5"
-                android:layout_alignParentStart="true"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="32dp"
-                android:text="@string/button_attach"/>
 
             <Button
                 android:id="@+id/sight_button_on_map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/layouts5"
-                android:layout_toEndOf="@+id/sight_button_attach"
+                android:layout_alignParentStart="true"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="32dp"
                 android:text="@string/button_show_on_the_map"/>
 
             <Button
-                android:id="@+id/sight_button_delete"
+                android:id="@+id/sight_button_save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/layouts5"
                 android:layout_toEndOf="@+id/sight_button_on_map"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/button_save"/>
+
+            <Button
+                android:id="@+id/sight_button_delete"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/sight_button_save"
                 android:layout_below="@id/layouts5"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="32dp"

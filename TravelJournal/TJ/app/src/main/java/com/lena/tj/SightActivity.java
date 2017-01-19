@@ -21,11 +21,14 @@ import com.lena.tj.db.DbOperations;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class SightActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSION = 2;
+    private static final int ATTACH_PHOTO = 1;
     private DOSight sight;
+    private ArrayList<String> photoPathes;
     private String mode;
 
     @Override
@@ -33,6 +36,7 @@ public class SightActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sight);
 
+        photoPathes = new ArrayList<>();
         mode = getIntent().getStringExtra(getString(R.string.sight_mode));
 
         final String json = getIntent().getStringExtra(getString(R.string.sight));
@@ -59,6 +63,80 @@ public class SightActivity extends AppCompatActivity {
                 showSightOnMap();
             }
         });
+
+        Button saveButton = (Button) findViewById(R.id.sight_button_save);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                savePhotos();
+                Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        Button clearButton = (Button) findViewById(R.id.sight_button_clear);
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearImages();
+            }
+        });
+
+        Button attachButton = (Button) findViewById(R.id.sight_button_attach);
+        attachButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                attachImages();
+            }
+        });
+    }
+
+    private void attachImages() {
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+        Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickIntent.setType("image/*");
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select PImage");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+        startActivityForResult(chooserIntent, ATTACH_PHOTO);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        switch (requestCode) {
+            case ATTACH_PHOTO:
+                if (resultCode == RESULT_OK) {
+                    Uri selectedImage = intent.getData();
+                    addImageOnViewByUri(selectedImage);
+                }
+        }
+    }
+
+    private void addImageOnViewByUri(Uri uri) {
+        InputStream imageStream = null;
+        try {
+            imageStream = getContentResolver().openInputStream(uri);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Bitmap photo = BitmapFactory.decodeStream(imageStream);
+        ImageView imageView = new ImageView(this);
+        imageView.setLayoutParams(new android.view.ViewGroup.LayoutParams(100, 120));
+        imageView.setImageBitmap(photo);
+        imageView.setPadding(10, 10, 5, 0);
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.show_imageviews_layout);
+        linearLayout.addView(imageView);
+
+        photoPathes.add(uri.toString());
+    }
+
+
+    private void savePhotos() {
+        DbOperations.deleteSightPhotos(this, sight);
+        DbOperations.addSightPhotos(this, sight.getId(), photoPathes);
     }
 
     private void showSightOnMap() {
@@ -83,7 +161,7 @@ public class SightActivity extends AppCompatActivity {
         TextView orderTextView = (TextView) findViewById(R.id.sight_order);
         TextView travelNameTextView = (TextView) findViewById(R.id.sight_travel_name_textview);
 
-        if (mode.equals(getString(R.string.travel))) {
+        if (mode.equals(getString(R.string.travel)) || sight.getTravelId() != null) {
             orderTextView.setText(Double.toString(newSight.getOrder()));
            // travelNameTextView.setText(Double.toString(newSight.getTravelId()));
         }
@@ -162,5 +240,14 @@ public class SightActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
+    }
+
+    private void clearImages() {
+        photoPathes = new ArrayList<>();
+
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.show_imageviews_layout);
+        if (linearLayout.getChildCount() > 0) {
+            linearLayout.removeAllViews();
+        }
     }
 }

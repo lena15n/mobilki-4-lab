@@ -19,6 +19,7 @@ import java.util.Random;
 
 import static com.lena.tj.db.TravelJournalContract.Sight.SELECT_FIRST_SIGHT_OF_TRAVEL;
 import static com.lena.tj.db.TravelJournalContract.Sight.SELECT_LAST_SIGHT_OF_TRAVEL;
+import static com.lena.tj.db.TravelJournalContract.Sight.SQL_LEFT_JOIN_PHOTO;
 import static com.lena.tj.db.TravelJournalContract.Sight.UPDATE_INCREMENT_ORDER;
 import static com.lena.tj.db.TravelJournalContract.Sight.WHERE_LAT_LONG;
 
@@ -133,11 +134,40 @@ public class DbOperations {
         db.close();
     }
 
+    public static void deleteSightPhotos(Context context, DOSight sight) {
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        if (sight.getPhotosSize() > 0) {
+            HashMap<Long, String> photos = sight.getPhotos();
+            for (Map.Entry<Long, String> photo : photos.entrySet()) {
+                int delCount = db.delete(TravelJournalContract.Photo.TABLE_NAME,
+                        TravelJournalContract.Photo._ID + " = " + photo.getKey(), null);
+            }
+        }
+
+        db.close();
+    }
+
+    public static void addSightPhotos(Context context, long sightId, ArrayList<String> photoPathes) {
+        TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        for (String photoPath : photoPathes) {
+            db.execSQL(TravelJournalContract.Photo.SQL_INSERT_ROW, new String[]{photoPath,
+                    String.valueOf(sightId)});
+        }
+
+        db.close();
+    }
+
     public static ArrayList<DOSight> getAllSights(Context context) {
         ArrayList<DOSight> sights = new ArrayList<>();
         TravelJournalDbHelper dbHelper = new TravelJournalDbHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String[] projection = {
+        Cursor cursor = db.rawQuery(SQL_LEFT_JOIN_PHOTO, new String[]{});
+
+        /*String[] projection = {
                 TravelJournalContract.Sight._ID,
                 TravelJournalContract.Sight.DESCRIPTION,
                 TravelJournalContract.Sight.LATITUDE,
@@ -159,12 +189,15 @@ public class DbOperations {
                 null,                                     // don't group the rows
                 null,                                     // don't filter by row groups
                 sortOrder                                 // The sort order
-        );
+        );*/
+
+        long prevSightId = -1;
+        DOSight sight = null;
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight._ID));
+                    long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_SIGHT_ID));
                     String desc = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Sight.DESCRIPTION));
                     double lat = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LATITUDE));
                     double lon = cursor.getDouble(cursor.getColumnIndex(TravelJournalContract.Sight.LONGITUDE));
@@ -175,12 +208,30 @@ public class DbOperations {
                     }
                     Long order = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.ORDER));
 
+                    Long photoId = null;
+                    if (!cursor.isNull(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_PHOTO_ID))) {
+                        photoId = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Sight.TEMP_PHOTO_ID));
+                    }
+                    String uri = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Photo.URI));
                     Log.d(MapsActivity.LOG_TAG, "Record: id = " + id + ", name: " + desc + ", icon: " + icon +
-                            "\nlat: " + lat + ", long: " + lon);
+                            "\nlat: " + lat + ", long: " + lon + " photoID: " + photoId + " uri: " + uri);
 
-                    sights.add(new DOSight(id, desc, lat, lon, icon, travelId, order, null));
+                    if (prevSightId == id) {
+                        sight.addPhoto(photoId, uri);
+                    } else {
+                        if (sight != null) {
+                            sights.add(sight);
+                        }
+                        sight = new DOSight(id, desc,lat, lon, icon, travelId, order, null);
+                        if (photoId != null) {
+                            sight.addPhoto(photoId, uri);
+                        }
+                        prevSightId = id;
+                    }
                 }
                 while (cursor.moveToNext());
+
+                sights.add(sight);
             }
             cursor.close();
         }
@@ -589,18 +640,19 @@ public class DbOperations {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] projection = new String[]{
                 TravelJournalContract.Photo._ID,
-                TravelJournalContract.Photo.URI
+                TravelJournalContract.Photo.URI,
+                TravelJournalContract.Photo.SIGHT_ID
         };
         Cursor cursor = db.query(TravelJournalContract.Photo.TABLE_NAME, projection, null, null, null, null, null);
-        Log.d(MapsActivity.LOG_TAG, "\tid\t\tdesc\t\ticon\t\tlat\t\tlon\t\ttravId\t\torder\t");
+        Log.d(MapsActivity.LOG_TAG, "\tid\t\turi\t\t\t\tsightId\t\t");
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
                     Long id = cursor.getLong(cursor.getColumnIndex(TravelJournalContract.Photo._ID));
                     String uri = cursor.getString(cursor.getColumnIndex(TravelJournalContract.Photo.URI));
-
-                    Log.d(MapsActivity.LOG_TAG, id + "\t\t" + uri + "\t\t");
+                    Integer sightId = cursor.getInt(cursor.getColumnIndex(TravelJournalContract.Photo.SIGHT_ID));
+                    Log.d(MapsActivity.LOG_TAG, id + "\t\t" + uri + "\t\t" + sightId + "\t\t");
                 }
                 while (cursor.moveToNext());
             }

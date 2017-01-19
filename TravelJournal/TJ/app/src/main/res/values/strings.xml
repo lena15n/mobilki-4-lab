@@ -47,6 +47,8 @@
     <string name="button_create">Create</string>
     <string name="button_show_on_the_map">Show on the map</string>
     <string name="button_attach">Attach</string>
+    <string name="button_clear">Clear</string>
+    <string name="button_save">Save</string>
 
     <string name="travel">Travel</string>
     <string name="travel_name">Name:</string>

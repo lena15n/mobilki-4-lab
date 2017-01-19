@@ -27,7 +27,6 @@ public class DOTravel {
     public void addPhotoToTheLastSight(Long id, String uri){
         DOSight sight = sights.get(sights.size() - 1);
         sight.addPhoto(id, uri);
-        sights.add(sights.size() - 1, sight);
     }
 
     public long getId() {

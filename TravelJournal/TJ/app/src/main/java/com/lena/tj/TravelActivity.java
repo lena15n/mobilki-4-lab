@@ -136,7 +136,7 @@ public class TravelActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.show_imageviews_layout);
+            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.travel_imageviews_layout);
             linearLayout.addView(imageView);
         }
     }

@@ -55,7 +55,7 @@ public final class TravelJournalContract {
                     Photo.TABLE_NAME + "." + Photo.URI +
                     " FROM " + Sight.TABLE_NAME + " LEFT JOIN " + Photo.TABLE_NAME +
                     " ON " + Sight.TABLE_NAME + "." + Sight._ID + " = " +
-                    Photo.TABLE_NAME + "." + Photo._ID +
+                    Photo.TABLE_NAME + "." + Photo.SIGHT_ID +
                 " ) AS " + Sight.TEMP_TABLE_NAME + " ON " +
                 TABLE_NAME + "." + _ID + " = " + Sight.TEMP_TABLE_NAME + "." + Sight.TRAVEL_ID +
                 " ORDER BY " + _ID + ", " + Sight.ORDER;
@@ -160,6 +160,12 @@ public final class TravelJournalContract {
                 " FROM " + TABLE_NAME +
                 " WHERE " + TRAVEL_ID + " IS NOT NULL)";
 
+        public static final String SQL_SELECT_SIGHTS_WITH_PHOTOS = " SELECT * " +
+                " FROM " + TABLE_NAME +
+                " LEFT JOIN " + Photo.TABLE_NAME +
+                " ON " + _ID + " = " + Photo.SIGHT_ID + " AS " + Sight.TEMP_PHOTO_ID +
+                " ORDER BY " + TABLE_NAME + "." + _ID + COMMA_SEP + Sight.TEMP_PHOTO_ID;
+
         private Sight (){}
     }
 
@@ -174,6 +180,10 @@ public final class TravelJournalContract {
                 URI + TEXT_TYPE + COMMA_SEP +
                 SIGHT_ID + INTEGER_TYPE + " )";
         public static final String SQL_DELETE_PHOTO = "DROP TABLE IF EXISTS " + TABLE_NAME;
+
+        public static final String SQL_INSERT_ROW = " INSERT INTO " + TABLE_NAME +
+                " ( " + URI + COMMA_SEP + SIGHT_ID + ") " +
+                " VALUES " + " (?, ?) ";
 
         private Photo (){}
     }
